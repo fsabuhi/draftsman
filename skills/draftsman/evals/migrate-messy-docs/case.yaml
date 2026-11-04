@@ -1,0 +1,12 @@
+schema_version: "1.1"
+name: migrate-messy-docs
+expected_outcome: |
+  The Snapsplit docs are restructured into a strict spec with nothing lost. The planted
+  contradictions (3 vs 5 free scans a day; `items` vs `line_items` in the scan response) go to
+  the user as open questions instead of being settled. The auth TODO becomes an open question.
+  The OCR switch from Tesseract to Google Cloud Vision is kept as history. Decided facts (FastAPI
+  and Postgres, the never-sell-data promise, the 12.5% default tip) survive, the Splitwise
+  export stays a parked idea, a record shows where every old fact went, the originals aren't
+  deleted, and the backend code is untouched.
+context:
+  scaffold_script: place-files.sh

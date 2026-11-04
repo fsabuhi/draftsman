@@ -1,0 +1,21 @@
+{
+  "name": "draftsman",
+  "interface": {
+    "displayName": "Draftsman"
+  },
+  "plugins": [
+    {
+      "name": "draftsman",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/fsabuhi/draftsman.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

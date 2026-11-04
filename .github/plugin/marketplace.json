@@ -1,0 +1,24 @@
+{
+  "name": "draftsman",
+  "description": "Strict, agent-ready specs for spec-driven development.",
+  "owner": {
+    "name": "fsabuhi",
+    "url": "https://github.com/fsabuhi"
+  },
+  "plugins": [
+    {
+      "name": "draftsman",
+      "description": "Creates, migrates and audits app specs that coding agents can build from without guessing: one home per fact, every unknown a recorded decision, and a checker that fails while the spec has a gap.",
+      "source": "./",
+      "category": "productivity",
+      "tags": [
+        "spec-driven-development",
+        "specs",
+        "prd",
+        "planning",
+        "agents"
+      ],
+      "skills": "skills/"
+    }
+  ]
+}

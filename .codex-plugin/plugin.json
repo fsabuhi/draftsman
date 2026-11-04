@@ -1,0 +1,36 @@
+{
+  "name": "draftsman",
+  "version": "0.1.0",
+  "description": "Creates, migrates and audits app specs that coding agents can build from without guessing: one home per fact, every unknown a recorded decision, and a checker that fails while the spec has a gap.",
+  "author": {
+    "name": "fsabuhi",
+    "url": "https://github.com/fsabuhi"
+  },
+  "homepage": "https://github.com/fsabuhi/draftsman",
+  "repository": "https://github.com/fsabuhi/draftsman",
+  "license": "MIT",
+  "keywords": [
+    "spec-driven-development",
+    "specs",
+    "prd",
+    "planning",
+    "agents"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Draftsman",
+    "shortDescription": "Strict, agent-ready specs for spec-driven development.",
+    "longDescription": "Creates, migrates and audits app specs that coding agents can build from without guessing: one home per fact, every unknown a recorded decision, and a checker that fails while the spec has a gap.",
+    "developerName": "fsabuhi",
+    "category": "Productivity",
+    "capabilities": [
+      "Instructions"
+    ],
+    "websiteURL": "https://github.com/fsabuhi/draftsman",
+    "defaultPrompt": [
+      "Write a spec for my app idea that agents can build from.",
+      "Turn our docs into an agent-ready spec without losing anything.",
+      "Audit our spec for gaps and contradictions."
+    ]
+  }
+}

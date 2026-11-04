@@ -1,0 +1,13 @@
+# Copy to .github/workflows/spec.yml to run the spec check on every push and pull request.
+name: spec
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python scripts/check_spec.py

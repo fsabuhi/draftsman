@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: audit-planted-gaps
+expected_outcome: |
+  The Tutorlink spec passes the checker as given, so every planted gap is one only a careful
+  reading finds: matching picks "the best available tutor" with no rule, tie-break or empty case;
+  the free booking limit has no period; sessions last 45 minutes in prose but 30 in limits.yaml;
+  milestone 2 needs vetted tutors but no team step vets them; step 2.3's done-when can't be
+  tested; POST /v1/bookings lists no errors for a taken slot or the limit; and "premium badge"
+  is never defined. The audit finds each, fixes what the docs answer and turns the rest into
+  open decisions, without inventing answers or accepting decisions for the user, and the checker
+  still passes.
+context:
+  scaffold_script: place-files.sh

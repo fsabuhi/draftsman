@@ -1,0 +1,5 @@
+#!/bin/sh
+# Blocks a commit while the spec check fails. Turn it on once per clone:
+#   git config core.hooksPath .githooks
+# Add each code folder's own checks below the spec check.
+python3 scripts/check_spec.py || exit 1

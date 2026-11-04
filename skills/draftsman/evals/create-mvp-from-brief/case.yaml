@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: create-mvp-from-brief
+expected_outcome: |
+  A complete spec for the Pantry Pal MVP, written from the brief without stopping to ask (the
+  user is unreachable). What the brief states is recorded as decided. What it leaves open (the
+  stack it's unsure about, how premium is billed, the LLM provider, free users' swaps, allergy
+  handling) becomes an open question with a recommendation, never a silent choice. The build
+  order has checkable done-whens and team tasks for human-only work, the refusal of calorie
+  counting is kept with its reason, and the run ends with what the user needs to decide.

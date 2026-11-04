@@ -1,0 +1,7 @@
+# Numbers the code reads. Prose refers to them as `limits.yaml → <key>`.
+free:
+  bookings: 3
+session:
+  minutes: 30
+sign_in:
+  link_minutes: 15
