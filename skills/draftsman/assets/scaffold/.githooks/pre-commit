@@ -2,4 +2,9 @@
 # Blocks a commit while the spec check fails. Turn it on once per clone:
 #   git config core.hooksPath .githooks
 # Add each code folder's own checks below the spec check.
-python3 scripts/check_spec.py || exit 1
+# uv installs PyYAML for YAML data files; plain python3 needs it installed already.
+if command -v uv >/dev/null 2>&1; then
+  uv run --quiet scripts/check_spec.py || exit 1
+else
+  python3 scripts/check_spec.py || exit 1
+fi

@@ -66,7 +66,7 @@ Write in this order, since each part leans on the ones before it:
    - Every later milestone ends with something a person can try end to end, and its done-when says what.
    - Bring in the hard parts one at a time, the riskiest early.
    - Make one list per stream of work, such as Backend, Client and Team. A step that needs another names it with `(after …)`.
-   - Each step is one sentence of scope, small enough for one agent session, with a `Done when:` that a test or a command proves.
+   - Each step is one sentence of scope, small enough for one agent session, with a `Done when:` that a test or a command proves. A `(team)` step's done-when names the outcome and who confirms it.
    - Work only people can do (accounts and keys, store listings, legal text, content, reviews, paid services) is a `(team)` step, placed before the step that needs it.
    - A step that an open decision blocks waits for it. Split off the unblocked part as its own step.
 9. Fill in the remaining `<<fill: …>>` markers in AGENTS.md, docs/AGENTS.md and docs/README.md.

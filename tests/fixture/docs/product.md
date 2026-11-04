@@ -34,4 +34,4 @@ Backend:
 Team:
 
 - [ ] **1.3** Sign up for the hosting account (team)
-  - Done when: the account is in the team's password manager.
+  - Done when: the team lead confirms the account is in the team's password manager.

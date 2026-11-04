@@ -23,10 +23,10 @@ Stop and ask the team. Don't pick an answer and carry on, and don't write a test
 
 Agents can work at the same time, one per build-order list; two on the same list would pick the same step. Git is the shared state, so there's no status file to keep up to date.
 
-- A step is done once it's ticked on `main`. It's taken while a branch named `step-<id>` exists, on this machine or on the remote: check `git branch --list 'step-*'` and `git ls-remote --heads origin 'step-*'` before you pick one.
-- Work in one worktree per step, `git worktree add .worktrees/<id> -b step-<id>`, and push the branch straight away so other machines see the claim.
-- Merge when the checks pass: commit, `git rebase main`, rerun the checks, then fast-forward `main` with `git merge --ff-only step-<id>`. When a rebase conflicts in a generated file, rerun its generator instead of merging it by hand.
-- Afterwards, remove the worktree and delete the branch, here and on the remote.
+- A step is done once it's ticked on `main`. It's taken while a branch named `step-<id>` exists: check `git branch --list 'step-*'` before you pick one, and when the repository has a remote, `git ls-remote --heads origin 'step-*'` too.
+- Work in one worktree per step, `git worktree add .worktrees/<id> -b step-<id>`, and, when there's a remote, push the branch straight away so other machines see the claim.
+- Merge when the checks pass: commit, `git rebase main`, rerun the checks, then fast-forward `main` with `git merge --ff-only step-<id>`, and push `main` when there's a remote. When a rebase conflicts in a generated file, rerun its generator instead of merging it by hand.
+- Afterwards, remove the worktree and delete the branch, here and on the remote if there is one.
 
 ## Rules for the whole repository
 

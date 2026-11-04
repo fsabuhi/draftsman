@@ -96,11 +96,11 @@ Client:
 Team:
 
 - [ ] **2.3** Review and publish the first 50 quiz items (team)
-  - Done when: 50 items are published.
+  - Done when: the content lead confirms 50 items are published.
 ```
 
 - Milestones are numbered from 1. A step id is `<milestone>.<n>` and unique; a split step adds a letter, like `2.1a`.
-- Every unticked step has a `Done when:` line that a test or a command can prove.
+- Every unticked step has a `Done when:` line. An agent's step names what a test or a command proves; a `(team)` step names the outcome and who confirms it.
 - `(after 2.1)` names the steps that must be ticked first. `(team)` marks work only people can do, such as writing or reviewing content, creating accounts and keys, and legal text; agents never take those steps.
 - Each list is named for whoever works it, and one agent works one list at a time.
 - A step that an open decision blocks waits. When only part of it is blocked, split it, and the unblocked part becomes its own step.

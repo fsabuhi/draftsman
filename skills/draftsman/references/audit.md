@@ -15,7 +15,7 @@ The checker catches what a script can see. The audit catches the rest: the gaps 
 | --- | --- | --- |
 | Blocked step | An unticked step needs a decision that's still open, or a fact nobody has written down | A payments step while the billing provider is undecided |
 | Missing team work | A milestone's done-when needs something no agent can do, and no `(team)` step does it | "Testers play a quiz set" while every quiz item is a draft nobody is assigned to review |
-| Unprovable done-when | A done-when that no test or command can check | "Users love it", "it feels fast" |
+| Unprovable done-when | An agent's step whose done-when no test or command can check, or a team step's that names no one to confirm it | "Users love it", "it feels fast" |
 | Incomplete contract | An interface missing an input, a possible result, an error or a limit | An endpoint that "returns the booking", though a booking can fail when the tutor is full |
 | Undefined rule | Something is picked, drawn, computed, ranked or matched with no rule, no tie-break or no empty case | "The app picks the best tutor" |
 | Vague counter | A limit without what it counts, when it's spent, when it resets, or what happens at the limit | "Free users get 3 bookings": a day, a month, or ever? |
