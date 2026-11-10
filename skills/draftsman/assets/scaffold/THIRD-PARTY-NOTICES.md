@@ -6,7 +6,7 @@ Work copied or adapted from other projects, with its licence.
 
 - Source: https://github.com/DietrichGebert/ponytail, commit 96608e0
 - Licence: MIT
-- Used in: `.agents/skills/review-step/SKILL.md`, `.agents/skills/audit-milestone/SKILL.md` and `.agents/skills/debt-ledger/SKILL.md`, adapted to the draftsman layout: its guides, spec and `NOTE:` comments
+- Used in: `.agents/skills/review-step/SKILL.md`, `.agents/skills/audit-milestone/SKILL.md` and `.agents/skills/debt-ledger/SKILL.md`, adapted to the draftsman layout: its guides, spec and `NOTE:` comments; and the rules in `AGENTS.md` on reuse, safety, finishing the change, comments and saying what was skipped, adapted from its main `ponytail` skill
 
 ```
 MIT License
