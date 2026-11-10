@@ -10,9 +10,11 @@ A draftsman draws the plans that builders follow exactly; here the builders are 
 ## What it produces
 
 ```
-AGENTS.md              how agents build from the spec: pick a step, build it, prove it, tick it
+AGENTS.md              how agents build from the spec: pick a step, build it, review it, merge it, tick it
 CLAUDE.md              @AGENTS.md, so Claude Code reads the same guide as every other agent
 .githooks/pre-commit   runs the checker before every commit
+.agents/skills/        review-step, audit-milestone and debt-ledger, which the build workflow uses
+THIRD-PARTY-NOTICES.md the licence of the work those skills adapt
 scripts/check_spec.py  the checker: plain Python 3.9+ (PyYAML only for YAML data files)
 docs/
   AGENTS.md            the rules and formats for everything below (read it before writing)
@@ -37,7 +39,7 @@ The skeleton is in `assets/scaffold/` in this skill's folder, with a `<<fill: â€
 4. **One home per fact.** Before writing a fact, find its home in the table in `docs/AGENTS.md`. If the fact already exists, link to it instead of restating it. When you move a fact, delete the old copy.
 5. **Lose nothing when migrating.** Every fact in the old docs lands in a home, or is listed as an exact duplicate. Nothing else is dropped without the user's yes, and old files are archived, not deleted, until the user approves the ledger.
 6. **The checker decides when you're done.** `python3 scripts/check_spec.py` has to pass in the final state. Fix the docs, never the checker, and never move or rename files to get around it.
-7. **Docs only.** Don't change application code, configuration or dependencies. Read code only as evidence for the spec.
+7. **Docs only.** Don't change application code, configuration or dependencies. Read code only as evidence for the spec. The scaffold's guides, skills and hook are part of the spec setup, not application code.
 8. **Leave the user in control of git.** Start from a clean working tree or a new branch, so the result is one diff the user can review. If there are uncommitted changes and nobody can be asked, go on, and name those files in your report. Don't commit unless the user asks.
 
 ## Pick the mode
@@ -46,7 +48,8 @@ The skeleton is in `assets/scaffold/` in this skill's folder, with a `<<fill: â€
 | --- | --- | --- |
 | No product docs | Create | `references/create.md` |
 | Docs of any other shape: a docs folder, a PRD, product sections in a README, notes | Migrate | `references/migrate.md` |
-| A draftsman spec: `scripts/check_spec.py` and `docs/AGENTS.md` | Audit | `references/audit.md` |
+| A draftsman spec whose `docs/product.md` still has `<<fill: â€¦>>` markers, such as a starter template with its platform already specified | Create, on that base | `references/create.md` |
+| A draftsman spec with no `<<fill: â€¦>>` markers left in `docs/product.md` | Audit | `references/audit.md` |
 
 Tell the user which mode you picked and why, in one line. If they asked for something specific, such as "just audit it", do that instead. Asking to improve or refactor a draftsman spec means an audit, because the audit fixes what it finds. Every mode ends with the audit and the checker.
 

@@ -33,6 +33,7 @@ When two sources disagree (two values, two rules, two names for one thing), don'
 ## 6. Write the new layout
 
 - Copy the scaffold without overwriting, as in `references/create.md`, step 1, merging into any AGENTS.md, CLAUDE.md or pre-commit hook that already exists.
+- When the existing AGENTS.md already has a build workflow, keep every rule of it that the scaffold's guide lacks, such as release steps, contract rules or stack checks, and add the scaffold's rules it lacks. Where the two disagree, such as how a step is claimed or merged, ask which one holds, and list the answer in the ledger.
 - Write the docs from the placed facts.
 - Move the old source files under `docs/` into `docs-archive/` with `git mv`, so the checker stops reading them and nothing is deleted yet. Leave sources outside `docs/`, such as README.md, where they are.
 - Write the build order from what the sources say is done and what's left. Tick only the steps the code shows are done, and ask about anything unclear.

@@ -27,6 +27,7 @@ The checker catches what a script can see. The audit catches the rest: the gaps 
 | Released-client trap | Something installed apps will depend on, still undecided before the first release | Whether a hidden score is left out of a response, sent as null or flagged |
 | Scope leak | An earlier step depends on something only a later phase specifies, or a feature file holds an idea no decision promoted | An MVP step that needs a later feature's data |
 | Refused work | A step or a feature that builds something never.md refuses | A reminder that guilt-trips users back, when never.md refuses guilt notifications |
+| Over budget | The MVP has more unticked agent steps than its accepted step budget allows | A budget of 12 steps and a build order with 19 |
 
 ## Record every finding
 

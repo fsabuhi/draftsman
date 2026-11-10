@@ -10,7 +10,7 @@ It's strict about gaps, not about length. A small MVP gets a small spec.
 
 | You have | Draftsman |
 | --- | --- |
-| An idea | **Creates** the spec. It interviews you a few questions at a time, always with a recommendation, and drafts the vision, phases, features, decisions and a build order agents can follow step by step. |
+| An idea, or a starter template whose spec is partly filled | **Creates** the spec. It interviews you a few questions at a time, always with a recommendation, and drafts the vision, phases, features, decisions and a build order agents can follow step by step. |
 | Docs in some other shape: a PRD, a README, notes | **Migrates** them into the strict layout without losing a fact. A ledger shows where every line went, and contradictions come back to you as questions instead of being settled quietly. |
 | A draftsman spec | **Audits** it for what the checker can't see: undefined rules, vague limits, contradictions, blocked steps and missing human work. Then it closes each gap. |
 
@@ -19,9 +19,11 @@ Every gap is closed one of three ways: Draftsman derives it from your docs or co
 ## What you get
 
 ```
-AGENTS.md              how agents build: pick a step, build it, prove it, tick it
+AGENTS.md              how agents build: pick a step, build it, review it, merge it, tick it
 CLAUDE.md              @AGENTS.md, so Claude Code reads the same guide
 .githooks/pre-commit   runs the checker before every commit
+.agents/skills/        review-step, audit-milestone and debt-ledger for the build workflow
+THIRD-PARTY-NOTICES.md the licence of the work those skills adapt
 scripts/check_spec.py  the checker
 docs/
   AGENTS.md            the rules and formats for everything below
@@ -37,6 +39,8 @@ docs/
 ```
 
 `AGENTS.md` is the standard file every major agent reads, so one spec works whichever agent you use. Several agents can work in parallel too: each takes one build-order list, and git branches show which steps are taken.
+
+The guide also carries a build workflow that runs without someone watching every step: one worktree per step, a review by a fresh agent before each merge, pull requests merged once CI passes (or fast-forwards without a remote), and a consolidation pass at the end of each milestone that audits the code and resolves the `NOTE:` comments marking deliberate simplifications. The team still confirms each milestone's done-when.
 
 ## What the checker enforces
 

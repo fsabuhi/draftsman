@@ -11,13 +11,15 @@ The goal is a spec agents can start building from today: the MVP fully specified
    cp -Rn <this skill's folder>/assets/scaffold/. <repo>/
    ```
 
-   For each file that already existed, merge the scaffold's content into it instead, and tell the user what you merged. CLAUDE.md must contain the line `@AGENTS.md`, and an existing pre-commit hook gets the spec check added to it. Keep `.githooks/pre-commit` executable (`chmod +x`), since git skips a hook that isn't.
+   For each file that already existed, merge the scaffold's content into it instead, and tell the user what you merged. CLAUDE.md must contain the line `@AGENTS.md`, an existing pre-commit hook gets the spec check added to it, and an existing THIRD-PARTY-NOTICES.md gets the scaffold's entry. Keep `.githooks/pre-commit` executable (`chmod +x`), since git skips a hook that isn't.
+   Claude Code reads skills from `.claude/skills/`, so link each skill there: `mkdir -p .claude/skills`, then `ln -s ../../.agents/skills/<name> .claude/skills/<name>` for each folder in `.agents/skills/`.
 3. Read the copied `docs/AGENTS.md`. It is the format everything you write follows.
 4. If the repository already has code, read enough of it to know the stack, the folders, and any endpoints, tables and limits that already exist. Those are facts: cite them rather than asking about them.
+5. **On a base.** When the repository already holds a draftsman spec with `<<fill: …>>` markers left, such as a starter template, its filled parts are facts: the accepted decisions, the shared docs, the data files, the guides and any ticked build steps. Read all of them. Don't ask what they answer, don't rewrite them, and write only what the markers ask for and what the new product adds.
 
 ## 2. Interview
 
-Take every answer the user's request already gives, and ask only what's missing. Ask in batches of up to five questions, each with your recommendation, following "Asking the user" in SKILL.md.
+Take every answer the user's request and the base already give, and ask only what's missing. On a base, round 4 is usually answered already. Ask in batches of up to five questions, each with your recommendation, following "Asking the user" in SKILL.md.
 
 **Round 1: the product**
 1. In one sentence, what does it do, and for whom?
@@ -45,6 +47,7 @@ Take every answer the user's request already gives, and ask only what's missing.
 
 **Round 5: how you'll work**
 - How many people and agents build at once, and on what? That sets the build-order lists.
+- How many build steps may the MVP take? A budget keeps the MVP small enough to ship when you need it. Record the answer as an accepted decision.
 - Who confirms that a milestone is done?
 - Is there a date the MVP must ship by?
 
@@ -69,6 +72,8 @@ Write in this order, since each part leans on the ones before it:
    - Each step is one sentence of scope, small enough for one agent session, with a `Done when:` that a test or a command proves. A `(team)` step's done-when names the outcome and who confirms it.
    - Work only people can do (accounts and keys, store listings, legal text, content, reviews, paid services) is a `(team)` step, placed before the step that needs it.
    - A step that an open decision blocks waits for it. Split off the unblocked part as its own step.
+   - On a base, keep its milestones and ticked steps as they are, and number new milestones after them.
+   - When the MVP has more unticked agent steps than the budget decision allows, don't cut on your own. List the features that could move to `after-launch`, the least needed first, with what each move saves, and ask.
 9. Fill in the remaining `<<fill: …>>` markers in AGENTS.md, docs/AGENTS.md and docs/README.md.
 
 ## 4. Audit and check

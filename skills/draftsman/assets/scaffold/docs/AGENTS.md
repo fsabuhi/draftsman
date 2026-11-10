@@ -19,6 +19,8 @@ These docs are the spec the code is built from, so an agent building from them s
 | Something we refuse to build | `docs/never.md` |
 | An idea nobody has decided on | `docs/ideas.md`, one line |
 | A risk and its guardrail | `docs/risks.md` |
+| The market and competitors, how the product finds users, and pricing strategy | `docs/business.md`, when the team keeps these in the repository |
+| Which existing app each screen's layout borrows from, with a link to its screens | `docs/shared/design.md`, when the product has screens |
 | How the code in a folder is written | `<folder>/AGENTS.md` |
 | The build workflow and the rules for the whole repository | `AGENTS.md` |
 <<fill: add a row for each shared doc this project has, such as the data model or the API conventions, and delete the error-code row if the project has no error codes>>
