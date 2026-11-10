@@ -52,6 +52,10 @@ Then merge as usual and ask the team to confirm the milestone's done-when.
 - **The docs are the spec.** Code never contradicts them. When code needs a fact the docs don't have, the fact goes into the docs in the same change.
 - **Nothing in [never.md](docs/never.md) gets built.**
 - **Reuse before writing.** Before new code, look for a helper, component or pattern already in the repository, then the standard library or an installed package. Only then write the minimum the step needs: no option, config or abstraction it doesn't use.
+- **Never cut safety to make a change smaller.** Validation at trust boundaries, error handling that prevents data loss, security and accessibility stay, whatever the diff size.
+- **Finish the whole change.** Every caller, test and fixture your change breaks is part of it. Code you move or merge keeps its error handling and validation.
+- **Comment only the why** the code can't show, in one line.
+- **Say what you skipped.** End each reply and pull request description (the commit message, without a remote) with what wasn't done or checked, and any risk the team must know.
 - **Fix a bug at its root.** Find every caller of the code you touch and fix the shared code once, not one caller.
 - **A fix comes with a test** that fails without it.
 - **Refactor in its own commit, never folded into a build step.** When a step can't be built cleanly without one, commit the refactor first on the same branch. Other mess you notice waits for the [consolidation pass](#consolidation-pass).
