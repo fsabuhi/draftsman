@@ -200,6 +200,8 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
     registry_path = docs / "shared" / "errors.md"
     registry = parse_registry(registry_path, prose, err)
     data = load_data_files(docs / "data", err)
+    # A superseded row is history: the keys it names may have moved since.
+    history = {r["line"] for r in decisions.values() if r["status"] == "superseded"}
     endpoint_home: dict[str, tuple[Path, int]] = {}
     anchor_cache: dict[Path, set[str]] = {}
     for f in files:
@@ -253,6 +255,8 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
                     err(f, f"`{code}` is {registry[code]} in docs/shared/errors.md, not {status}", ln)
         for m in DATA_REF.finditer(p):
             name, ln = m.group(1), lineno(p, m.start())
+            if f == dec_path and ln in history:
+                continue
             key = m.group(2).split("<")[0].split("*")[0].strip().rstrip(".")
             if name not in data:
                 err(f, f"docs/data/{name} doesn't exist", ln)

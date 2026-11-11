@@ -101,6 +101,8 @@ BREAKS = [
      "it needs a row in docs/shared/errors.md"),
     ("missing data key", lambda r: append(r, "docs/ideas.md", "- Up to `limits.json → free.swaps`.\n"),
      "docs/data/limits.json has no key `free.swaps`"),
+    ("missing data key in a decision", lambda r: edit(r, "docs/decisions.md", "no photo in the MVP |", "no photo, under `limits.json → free.photos` |"),
+     "docs/data/limits.json has no key `free.photos`"),
     ("missing data file", lambda r: append(r, "docs/ideas.md", "- Up to `caps.yaml → free.swaps`.\n"),
      "docs/data/caps.yaml doesn't exist"),
     ("unreadable data file", lambda r: (r / "docs/data/limits.json").write_text("{nope"), "limits.json: can't be read"),
@@ -152,6 +154,10 @@ class CheckSpec(unittest.TestCase):
 
     def test_team_step_may_name_the_decision_it_answers(self):
         edit(self.root, "docs/product.md", "Confirm milestone 1's done-when (team)", "Confirm milestone 1's done-when (team; D-003)")
+        self.assertEqual(self.problems(), [])
+
+    def test_superseded_rows_may_name_keys_that_moved(self):
+        edit(self.root, "docs/decisions.md", "Listings carry a photo |", "Listings carry `limits.json → free.photos` photos |")
         self.assertEqual(self.problems(), [])
 
     def test_migration_archive_is_ignored(self):
