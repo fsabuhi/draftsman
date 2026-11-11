@@ -45,6 +45,8 @@ BREAKS = [
      "D-002 supersedes D-003, so mark D-003 `superseded`"),
     ("open row blocks nothing", lambda r: edit(r, "docs/decisions.md", "| Step 1.3 |", "| soon |"),
      "D-003: Needed by names what it blocks"),
+    ("phase named in prose", lambda r: edit(r, "docs/decisions.md", "| Step 1.3 |", "| Before the MVP launch |"),
+     "D-003: Needed by names what it blocks"),
     ("open row blocks a ticked step", lambda r: edit(r, "docs/decisions.md", "| Step 1.3 |", "| Step 1.1 |"),
      "step 1.1 is ticked, but D-003"),
     ("open row blocks a missing step", lambda r: edit(r, "docs/decisions.md", "| Step 1.3 |", "| Step 4.1 |"),
@@ -55,6 +57,18 @@ BREAKS = [
      "step 1.2 needs an indented `- Done when: …` line"),
     ("step after a missing step", lambda r: edit(r, "docs/product.md", "(after 1.1;", "(after 1.9;"),
      "step 1.2 comes after step 1.9"),
+    ("after sharing its parentheses", lambda r: edit(r, "docs/product.md", "(after 1.1; D-002)", "(D-002; after 1.9)"),
+     "step 1.2 comes after step 1.9"),
+    ("step names an open decision that doesn't hold it",
+     lambda r: edit(r, "docs/product.md", "(after 1.1; D-002)", "(after 1.1; D-002, D-003)"),
+     "step 1.2 names D-003, which is open but doesn't hold the step back"),
+    ("step builds on a proposed decision",
+     lambda r: edit(r, "docs/decisions.md", "| accepted | Listings carry no photo", "| proposed | Listings carry no photo"),
+     "step 1.2 names D-002, which is only proposed"),
+    ("milestone without a confirm step", lambda r: edit(r, "docs/product.md", "Confirm milestone 1's done-when", "Check milestone 1"),
+     "milestone 1 needs a `Confirm milestone 1's done-when (team)` step"),
+    ("confirmed milestone with an unticked step", lambda r: edit(r, "docs/product.md", "- [ ] **1.4** Confirm", "- [x] **1.4** Confirm"),
+     "milestone 1 is confirmed, but step 1.2 isn't ticked"),
     ("malformed step", lambda r: edit(r, "docs/product.md", "- [x] **1.1**", "- [x] 1.1"),
      "a step is written `- [ ] **<id>** <what it builds>`"),
     ("step in the wrong milestone", lambda r: edit(r, "docs/product.md", "**1.3**", "**2.1**"),
@@ -129,6 +143,15 @@ class CheckSpec(unittest.TestCase):
 
     def test_code_spans_and_blocks_may_quote_placeholders(self):
         append(self.root, "docs/ideas.md", "\nThe check rejects `TBD` and `etc.`:\n\n```\nTODO etc. D-999 [x](nope.md)\n```\n")
+        self.assertEqual(self.problems(), [])
+
+    def test_open_decision_held_through_an_earlier_step(self):
+        """D-003 holds step 1.3, so a step that comes after 1.3 waits for it too."""
+        edit(self.root, "docs/product.md", "(after 1.1; D-002)", "(after 1.1, 1.3; D-002, D-003)")
+        self.assertEqual(self.problems(), [])
+
+    def test_team_step_may_name_the_decision_it_answers(self):
+        edit(self.root, "docs/product.md", "Confirm milestone 1's done-when (team)", "Confirm milestone 1's done-when (team; D-003)")
         self.assertEqual(self.problems(), [])
 
     def test_migration_archive_is_ignored(self):

@@ -69,9 +69,10 @@ Write in this order, since each part leans on the ones before it:
    - Every later milestone ends with something a person can try end to end, and its done-when says what.
    - Bring in the hard parts one at a time, the riskiest early.
    - Make one list per stream of work, such as Backend, Client and Team. A step that needs another names it with `(after …)`.
+   - End each milestone's Team list with `Confirm milestone <n>'s done-when (team)`, under the milestone's last id.
    - Each step is one sentence of scope, small enough for one agent session, with a `Done when:` that a test or a command proves. A `(team)` step's done-when names the outcome and who confirms it.
    - Work only people can do (accounts and keys, store listings, legal text, content, reviews, paid services) is a `(team)` step, placed before the step that needs it.
-   - A step that an open decision blocks waits for it. Split off the unblocked part as its own step.
+   - A step that an open decision blocks waits for it: name the step under the decision's Needed by, or make it come `(after …)` a step that's named. When only part of a step is blocked, ask the user whether to split off the unblocked part.
    - On a base, keep its milestones and ticked steps as they are, and number new milestones after them.
    - When the MVP has more unticked agent steps than the budget decision allows, don't cut on your own. List the features that could move to `after-launch`, the least needed first, with what each move saves, and ask.
 9. Fill in the remaining `<<fill: …>>` markers in AGENTS.md, docs/AGENTS.md and docs/README.md.

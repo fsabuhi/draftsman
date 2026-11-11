@@ -2,6 +2,6 @@
 
 Every error the product returns carries one of these codes. This file is each code's one home; other docs name a code with its status, as [the docs rules](../AGENTS.md#error-codes) show.
 
-| Code | Status | Meaning | The client |
+| Code | Status | Means | Where its rule lives |
 | --- | --- | --- | --- |
-<<fill: one row per code: the snake_case code in backticks, its status, what it means, and what the client does about it>>
+<<fill: one row per code: the snake_case code in backticks, its status, what it means in a few words, and a link to the doc whose rule raises it>>

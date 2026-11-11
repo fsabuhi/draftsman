@@ -19,6 +19,8 @@ These docs are the spec the code is built from, so an agent building from them s
 | Something we refuse to build | `docs/never.md` |
 | An idea nobody has decided on | `docs/ideas.md`, one line |
 | A risk and its guardrail | `docs/risks.md` |
+| The market and competitors, how the product finds users, and pricing strategy | `docs/business.md`, when the team keeps these in the repository |
+| Which existing app each screen's layout borrows from, with a link to its screens | `docs/shared/design.md`, when the product has screens |
 | How the code in a folder is written | `<folder>/AGENTS.md` |
 | The build workflow and the rules for the whole repository | `AGENTS.md` |
 
@@ -33,8 +35,8 @@ These docs are the spec the code is built from, so an agent building from them s
 
    Numbers the code never reads, such as targets, gate bars and prices quoted in prose, stay in prose in their one home. A value means one thing: never let one value, such as `null`, stand for both "unlimited" and "not decided yet".
 3. **Decisions are append-only.** Never rewrite an accepted row: add a new one, set the old one to `superseded`, and name it in the new row's Supersedes cell. Other docs state only the current answer and cite the decisions behind it, never a superseded one.
-4. **Unknowns are `open` decisions, never placeholder text.** Each open row carries a recommendation and, under Needed by, the first work that waits for the answer: a step (`Step 2.3`), a milestone (`Milestone 4`, so none of its steps start) or a phase (which doesn't start until then). The checker fails on `TBD`, `TODO`, `etc.`, `and so on` and other placeholders.
-5. **Accepted means the team said yes.** Agents add `open` rows, and `proposed` rows when the team asks for a draft; only the team accepts one. A recommendation in a proposed or open row doesn't authorize building it.
+4. **Unknowns are `open` decisions, never placeholder text.** Each open row carries a recommendation and, under Needed by, the first work that waits for the answer: a step (`Step 2.3`), a milestone (`Milestone 4`, so none of its steps start) or a phase, written as its backticked slug (`after-launch`, which doesn't start until then). The checker fails on `TBD`, `TODO`, `etc.`, `and so on` and other placeholders.
+5. **Accepted means the team said yes.** Agents never decide: they add `open` rows, and `proposed` rows when the team asks for a draft; only the team accepts one. A recommendation in a proposed or open row doesn't authorize building it.
 6. **New ideas start in `docs/ideas.md`.** A feature file is created only when a decision promotes the idea.
 7. **Leave nothing to guess.**
    - A list names every member.
@@ -55,7 +57,7 @@ decisions: [D-004, D-012]
 ---
 ```
 
-`ships_in` is the earliest phase the feature ships in, one of the phases in [the roadmap](product.md#phases-and-gates). `decisions` lists the decisions the feature relies on, or `[]`. The title is the `# H1`, followed by two sections and no others:
+`ships_in` is the earliest phase the feature ships in, one of the phases in [the roadmap](product.md#phases-and-gates). A feature's `ships_in` stays its schedule until a decision changes it, whatever an open row recommends. `decisions` lists the decisions the feature relies on, or `[]`. The title is the `# H1`, followed by two sections and no others:
 
 - `## Behavior`: what the user experiences and the rules, then a `### Done when` list and an optional `### Out of scope`.
 - `## Implementation`: the interfaces the feature owns, the data it reads and writes, its jobs and its limits. Every feature in the first phase has one; later features may hold only notes.
@@ -95,14 +97,17 @@ Client:
 Team:
 
 - [ ] **2.3** Review and publish the first 50 quiz items (team)
-  - Done when: 50 items are published.
+  - Done when: the content lead confirms 50 items are published.
+- [ ] **2.4** Confirm milestone 2's done-when (team)
+  - Done when: the team confirms the milestone's done-when holds.
 ```
 
 - Milestones are numbered from 1. A step id is `<milestone>.<n>` and unique; a split step adds a letter, like `2.1a`.
-- Every unticked step has a `Done when:` line that a test or a command can prove.
-- `(after 2.1)` names the steps that must be ticked first. `(team)` marks work only people can do, such as writing or reviewing content, creating accounts and keys, and legal text; agents never take those steps.
+- Every unticked step has a `Done when:` line. An agent's step names what a test or a command proves; a `(team)` step names the outcome and who confirms it.
+- `(after 2.1)` names the steps that must be ticked first; it can share the parentheses with a link or decision ids, separated by `;`. `(team)` marks work only people can do, such as writing or reviewing content, creating accounts and keys, and legal text; agents never take those steps.
 - Each list is named for whoever works it, and one agent works one list at a time.
-- A step that an open decision blocks waits. When only part of it is blocked, split it, and the unblocked part becomes its own step.
+- Every milestone's Team list ends with `Confirm milestone <n>'s done-when (team)`. The team ticks it once the milestone's done-when holds, and agents work only in the earliest milestone whose confirm step is unticked.
+- A step that names an open decision waits for it: the decision's Needed by names the step, or the step comes `(after …)` one that it names. A step never builds on a `proposed` row. When only part of a step is blocked, the team may split it, and the unblocked part becomes its own step; agents ask, never split on their own.
 
 ## Error codes
 

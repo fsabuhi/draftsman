@@ -34,10 +34,15 @@ A phase starts only when the gate before it is met.
 
 ### Build order
 
-Each milestone lists its steps by who works them, and a step that needs another names it with `(after …)`. Build each list top to bottom and tick each step when its done-when holds. When all of a milestone's steps are ticked, the team confirms its done-when before the next milestone starts. The format is in [the docs rules](AGENTS.md#build-order).
+Each milestone lists its steps by who works them, and a step that needs another names it with `(after …)`. Every milestone ends with a team step that confirms its done-when, and the next milestone starts once it's ticked. How agents pick and build steps is in [AGENTS.md](../AGENTS.md#before-you-write-code); the format is in [the docs rules](AGENTS.md#build-order).
 
 #### 1. <<fill: the first milestone's name>>
 
 Done when <<fill: what a person can do once this milestone is built>>.
 
-<<fill: one list per stream of work, each step in the format from docs/AGENTS.md>>
+<<fill: one list per stream of work, each step in the format from docs/AGENTS.md, then the Team list's own steps above its confirm step, which keeps the milestone's last id>>
+
+Team:
+
+- [ ] **1.1** Confirm milestone 1's done-when (team)
+  - Done when: the team confirms the milestone's done-when holds.

@@ -27,6 +27,9 @@ DECISION = re.compile(r"\bD-\d{3,}\b")
 STEP = re.compile(r"^- \[([ x])\] \*\*((\d+)\.\d+[a-z]?)\*\* (\S.*)$")
 STEP_LIKE = re.compile(r"^\s*[-*+] \[[ xX]\]")
 STEP_REF = re.compile(r"\b\d+\.\d+[a-z]?\b")
+# "(after 2.1)", "(after 2.1, 2.3; D-004)" or "(…; after 2.1)": the ids that follow the word.
+AFTER = re.compile(r"\bafter (\d+\.\d+[a-z]?(?:(?:,| and|, and) \d+\.\d+[a-z]?)*)")
+TEAM = re.compile(r"[(;]\s*team\s*[;)]")
 DONE_WHEN = re.compile(r"^\s+- Done when: \S")
 ENDPOINT = re.compile(r"^\|\s*`((?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) /[^`]*)`\s*\|")
 ERROR_MENTION = re.compile(r"`([a-z][a-z0-9_]*)` \(([1-5]\d\d)\)")
@@ -182,6 +185,7 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
     if dec_path in prose:
         decisions = parse_decisions(dec_path, numbered(prose[dec_path]), err)
         check_decision_links(decisions, phases, steps, milestones, dec_path, err)
+        check_step_decisions(decisions, steps, docs / "product.md", err)
 
     fdir = docs / "features"
     features: dict[str, tuple[str, str | None]] = {}
@@ -327,8 +331,11 @@ def parse_build_order(lines, path, err):
                     err(path, f"step {sid} is defined twice", ln)
                 if major != num:
                     err(path, f"step {sid} sits in milestone {num}, so its id starts with {num}.", ln)
-                current = steps[sid] = {"ticked": s.group(1) == "x", "line": ln, "text": s.group(4),
-                                        "done_when": False, "milestone": num}
+                text = s.group(4)
+                current = steps[sid] = {"ticked": s.group(1) == "x", "line": ln, "text": text,
+                                        "done_when": False, "milestone": num, "team": bool(TEAM.search(text)),
+                                        "decisions": DECISION.findall(text),
+                                        "after": [r for g in AFTER.findall(text) for r in STEP_REF.findall(g)]}
                 milestones[num].append(sid)
             elif STEP_LIKE.match(line):
                 err(path, "a step is written `- [ ] **<id>** <what it builds>`", ln)
@@ -342,11 +349,21 @@ def parse_build_order(lines, path, err):
         if not s["ticked"] and not s["done_when"]:
             err(path, f"step {sid} needs an indented `- Done when: …` line that a test or a command can prove",
                 s["line"])
-        for group in re.findall(r"\(after ([^)]*)\)", s["text"]):
-            for ref in STEP_REF.findall(group):
-                if ref == sid or ref not in steps:
-                    err(path, f"step {sid} comes after step {ref}, which isn't another step in the build order",
-                        s["line"])
+        for ref in s["after"]:
+            if ref == sid or ref not in steps:
+                err(path, f"step {sid} comes after step {ref}, which isn't another step in the build order",
+                    s["line"])
+    for num, ids in milestones.items():
+        confirm = [sid for sid in ids if steps[sid]["team"]
+                   and re.match(rf"Confirm milestone {num}['’]s done-when", steps[sid]["text"])]
+        if not confirm:
+            line = next((n for t, n, _ in sections(lines, 4) if t.startswith(f"{num}. ")), 0)
+            err(path, f"milestone {num} needs a `Confirm milestone {num}'s done-when (team)` step, "
+                      "so agents know when the next milestone may start", line)
+        elif steps[confirm[0]]["ticked"]:
+            for sid in ids:
+                if not steps[sid]["ticked"]:
+                    err(path, f"milestone {num} is confirmed, but step {sid} isn't ticked", steps[sid]["line"])
     return steps, milestones
 
 
@@ -406,7 +423,8 @@ def check_decision_links(rows, phases, steps, milestones, path, err):
         need = r["cells"][5]
         named_steps = re.findall(r"\bstep\s+(\d+\.\d+[a-z]?)", need, re.I)
         named_milestones = [int(x) for x in re.findall(r"\bmilestone\s+(\d+)", need, re.I)]
-        named_phases = [p for p in phases if re.search(rf"(?<![\w-]){re.escape(p)}(?![\w-])", need, re.I)]
+        named_phases = [p for p in phases if f"`{p}`" in need]
+        r["holds"] = (set(named_steps), set(named_milestones), named_phases)
         if not (named_steps or named_milestones or named_phases):
             examples = ", ".join(f"`{p}`" for p in phases) or "from the roadmap"
             err(path, f"{did}: Needed by names what it blocks: a step (Step 2.3), "
@@ -421,6 +439,32 @@ def check_decision_links(rows, phases, steps, milestones, path, err):
                 err(path, f"{did} is needed by milestone {m}, which isn't in the build order", r["line"])
             elif milestones[m] and all(steps[s]["ticked"] for s in milestones[m]):
                 err(path, f"milestone {m} is done, but {did}, which it needs, is still open", r["line"])
+
+
+def check_step_decisions(rows, steps, path, err):
+    """An agent's step that names an open decision must wait for it, and one that names a proposed
+    decision can't start: a recommendation doesn't authorize building it. Team steps may be the
+    work that answers a decision, so they're left out."""
+    def held(sid, did, seen):
+        if sid in seen or sid not in steps:
+            return False
+        seen.add(sid)
+        named_steps, named_milestones, named_phases = rows[did]["holds"]
+        if named_phases or sid in named_steps or steps[sid]["milestone"] in named_milestones:
+            return True
+        return any(held(a, did, seen) for a in steps[sid]["after"])
+
+    for sid, s in steps.items():
+        if s["ticked"] or s["team"]:
+            continue
+        for did in dict.fromkeys(s["decisions"]):
+            status = rows.get(did, {}).get("status")
+            if status == "proposed":
+                err(path, f"step {sid} names {did}, which is only proposed: the team accepts it first, "
+                          "or it becomes an open row that names this step under Needed by", s["line"])
+            elif status == "open" and "holds" in rows[did] and not held(sid, did, set()):
+                err(path, f"step {sid} names {did}, which is open but doesn't hold the step back: name the step "
+                          f"under {did}'s Needed by, or make it wait (after …) for a step that does", s["line"])
 
 
 def check_feature(path, text, phases, roadmap_text, err):

@@ -18,4 +18,4 @@ A recommendation in a proposed or open row doesn't authorize building that choic
 
 | ID | Date | Status | Question | Recommendation | Needed by |
 | --- | --- | --- | --- | --- | --- |
-| D-006 | 2026-10-22 | open | How are tutors paid once the pilot ends? | Stripe Connect, which handles payouts and UK tax reporting | after-launch |
+| D-006 | 2026-10-22 | open | How are tutors paid once the pilot ends? | Stripe Connect, which handles payouts and UK tax reporting | `after-launch` |

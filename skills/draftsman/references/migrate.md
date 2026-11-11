@@ -36,11 +36,12 @@ When two sources disagree (two values, two rules, two names for one thing), don'
 - When the existing AGENTS.md already has a build workflow, keep every rule of it that the scaffold's guide lacks, such as release steps, contract rules or stack checks, and add the scaffold's rules it lacks. Where the two disagree, such as how a step is claimed or merged, ask which one holds, and list the answer in the ledger.
 - Write the docs from the placed facts.
 - Move the old source files under `docs/` into `docs-archive/` with `git mv`, so the checker stops reading them and nothing is deleted yet. Leave sources outside `docs/`, such as README.md, where they are.
+- When the old docs already sit in draftsman's homes (product.md, decisions.md, `features/<slug>.md` and the rest), migrate in place instead: edit each file where it is and archive nothing, because the diff shows every change.
 - Write the build order from what the sources say is done and what's left. Tick only the steps the code shows are done, and ask about anything unclear.
 
 ## 7. Write the ledger
 
-Write `spec-migration.md` at the repository root:
+Write `spec-migration.md` at the repository root, or, for an in-place migration that lands as a pull request, put the ledger in its description:
 
 | Source | Fact | Now in |
 | --- | --- | --- |
@@ -48,8 +49,8 @@ Write `spec-migration.md` at the repository root:
 | docs/notes.md:3 | Free users get five analyses a day | open D-007 (contradicts docs/PRD.md:12) |
 | README.md:5 | The one-line pitch | duplicate of docs/product.md, Vision |
 
-Every line of every source has to be covered. "Now in" is a home, "duplicate of <home>", an open decision, or "dropped: <reason>". A dropped fact needs the user's yes. End the ledger with what can be removed once the user approves: everything in `docs-archive/`, and the parts of README.md or other files outside `docs/` that now only restate the spec.
+Every line of every source has to be covered. In place, list only the facts that moved, changed or were added, and say that every other line kept its home. "Now in" is a home, "duplicate of <home>", an open decision, or "dropped: <reason>". A dropped fact needs the user's yes. End the ledger with what can be removed once the user approves: everything in `docs-archive/`, and the parts of README.md or other files outside `docs/` that now only restate the spec.
 
 ## 8. Audit and check
 
-Run the audit in `references/audit.md`, then the checker until it passes. Point the user to the ledger, and ask them to approve it before `docs-archive/` is deleted.
+Run the audit in `references/audit.md`, then the checker until it passes. Point the user to the ledger, and ask them to approve it before `docs-archive/` is deleted, or before the pull request merges for an in-place migration.

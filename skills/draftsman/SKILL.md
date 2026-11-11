@@ -57,6 +57,7 @@ Tell the user which mode you picked and why, in one line. If they asked for some
 
 - Ask in batches of at most five questions, the most blocking first.
 - Give every question your recommendation and its reason, so that "yes" is a complete answer.
+- Never decide for the user, and that includes structure: whether to split a step, which steps a decision holds, or what a milestone contains. Recommend, then ask.
 - Ask only what the user alone can know. If the docs or the code answer it, derive the answer and cite where it came from.
 - "I don't know", "later", or no answer at all becomes an `open` decision with your recommendation and the step, milestone or phase it blocks.
 - If the user says they can't answer now, or nobody can be asked (an unattended run), don't stop. Record every question as an open decision, finish everything else, and list those decisions in your report.

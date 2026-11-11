@@ -54,6 +54,11 @@ Client:
 - [ ] **1.3** The Expo app shell, with sign-up and sign-in (after 1.2)
   - Done when: a screen test signs a user in against a mocked API.
 
+Team:
+
+- [ ] **1.4** Confirm milestone 1's done-when (team)
+  - Done when: the team confirms the milestone's done-when holds.
+
 #### 2. First booking
 
 Done when a student on staging can book a session with a vetted tutor and both can join its video room.
@@ -71,3 +76,8 @@ Client:
   - Done when: tutors find onboarding easy and quick.
 - [ ] **2.4** The booking screens and the video room (after 2.2)
   - Done when: a screen test books a session against a mocked API.
+
+Team:
+
+- [ ] **2.5** Confirm milestone 2's done-when (team)
+  - Done when: the team confirms the milestone's done-when holds.

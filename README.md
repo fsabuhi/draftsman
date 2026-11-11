@@ -40,7 +40,7 @@ docs/
 
 `AGENTS.md` is the standard file every major agent reads, so one spec works whichever agent you use. Several agents can work in parallel too: each takes one build-order list, and git branches show which steps are taken.
 
-The guide also carries a build workflow that runs without someone watching every step: one worktree per step, a review by a fresh agent before each merge, pull requests merged once CI passes (or fast-forwards without a remote), and a consolidation pass at the end of each milestone that audits the code and resolves the `NOTE:` comments marking deliberate simplifications. The team still confirms each milestone's done-when.
+The guide also carries a build workflow that runs without someone watching every step: one worktree per step, a review by a fresh agent before each merge, pull requests merged once CI passes (or fast-forwards without a remote), and a consolidation pass at the end of each milestone that audits the code and resolves the `NOTE:` comments marking deliberate simplifications. Agents never decide: a step that an open decision names waits for the answer, and nothing is stubbed. Each milestone ends with a team step that confirms its done-when, and agents start the next milestone only once it's ticked.
 
 ## What the checker enforces
 
@@ -49,8 +49,9 @@ The guide also carries a build workflow that runs without someone watching every
 - Placeholder text: `TBD`, `TODO`, `etc.`, "to be decided" or an unfilled template marker.
 - A broken link or anchor.
 - A decision that's cited but doesn't exist, or a citation of a superseded decision.
-- A malformed decision row, an open decision that doesn't name the step, milestone or phase it blocks, or a superseded row that nothing replaced.
-- An unticked build step without a done-when, an `(after …)` that names a missing step, or a milestone without a done-when.
+- A malformed decision row, an open decision that doesn't name the step, milestone or backticked phase it blocks, or a superseded row that nothing replaced.
+- An unticked build step without a done-when, an `(after …)` that names a missing step, or a milestone without a done-when or a confirm step.
+- An agent's step that names an open decision without waiting for it, or builds on a proposed one.
 - A feature with the wrong frontmatter or sections, no done-when, or an unknown phase, or one that isn't linked from the roadmap.
 - The same endpoint defined in two places.
 - An error code that isn't in the registry, or that's used with the wrong status.

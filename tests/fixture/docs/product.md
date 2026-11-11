@@ -35,3 +35,5 @@ Team:
 
 - [ ] **1.3** Sign up for the hosting account (team)
   - Done when: the team lead confirms the account is in the team's password manager.
+- [ ] **1.4** Confirm milestone 1's done-when (team)
+  - Done when: the team confirms the milestone's done-when holds.

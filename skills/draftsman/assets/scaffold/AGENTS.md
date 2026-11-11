@@ -11,14 +11,14 @@
 
 ## Before you write code
 
-1. **Pick a step** from [the build order](docs/product.md#build-order), in the list you're working on: the first unticked step that isn't marked `(team)`, whose `(after …)` steps are all ticked on the shared `main`, that nobody has taken (see [Parallel sessions](#parallel-sessions)), and that isn't waiting on a decision: no `open` row in [decisions.md](docs/decisions.md) names the step or its milestone under Needed by. If no step qualifies, stop and tell the team which decisions or team steps are in the way.
+1. **Pick a step** from [the build order](docs/product.md#build-order), in the list you're working on, in the earliest milestone whose confirm step isn't ticked on the shared `main`: the first unticked step that isn't marked `(team)`, whose `(after …)` steps are all ticked there, that nobody has taken (see [Parallel sessions](#parallel-sessions)), and that isn't waiting on a decision: no `open` row in [decisions.md](docs/decisions.md) names the step, its milestone or its phase under Needed by, and nothing it builds depends on a `proposed` row. If no step qualifies, stop and tell the team which decisions or team steps are in the way.
 2. **Read** the step's feature file, then the shared docs and data keys it links to. Links into later phases are context, not scope.
 3. **Build the step and nothing else.** Its done-when is the bar: prove it with a test or a command.
-4. **Tick the step** on its branch once its done-when holds and the checks pass, so the tick lands with the step. When every step of a milestone is ticked, run the [consolidation pass](#consolidation-pass), then stop: the team confirms the milestone's done-when before the next milestone starts.
+4. **Tick the step** on its branch once its done-when holds and the checks pass, so the tick lands with the step. When every agent step of a milestone is ticked, run the [consolidation pass](#consolidation-pass), then stop: the team ticks the milestone's confirm step once its done-when holds, and only then does the next milestone start.
 
 ## When the spec doesn't say
 
-Stop and ask the team. Don't pick an answer and carry on, and don't write a test that picks one. Put the answer in its one home in the same change; if it's a choice the team will make later, add an `open` row to decisions.md that names the step it blocks. If only part of a step is blocked, split the step and build the unblocked part.
+Agents never decide; the team does. Stop and ask the team, with your recommendation. Don't pick an answer and carry on, don't stub the undecided part, and don't write a test that picks one. Put the answer in its one home in the same change; if the team will choose later, add an `open` row to decisions.md that names the step it blocks, and that step waits. If only part of a step is blocked, ask the team whether to split it; never split it yourself.
 
 ## Parallel sessions
 
@@ -37,14 +37,14 @@ Agents can work at the same time, one per build-order list; two on the same list
 
 ## Consolidation pass
 
-Cleanup happens at the end of every milestone, without waiting for a yes. Once every list's steps for a milestone are ticked on the shared `main`, one agent runs the pass in a worktree named `consolidate-<milestone>`:
+Cleanup happens at the end of every milestone, without waiting for a yes. Once every agent step of a milestone is ticked on the shared `main`, one agent runs the pass in a worktree named `consolidate-<milestone>`:
 
 1. Follow [audit-milestone](.agents/skills/audit-milestone/SKILL.md) on the code folders, and [debt-ledger](.agents/skills/debt-ledger/SKILL.md) for the `NOTE:` comments that are due.
 2. Fix every must-fix and should-fix finding: delete dead code, reuse instead of duplicating, merge near-copies, split code that mixes jobs, and resolve each `NOTE:` whose upgrade point has been reached.
 3. Each refactor is its own commit and changes no behavior: the existing tests pass unchanged, and a bug fix still comes with its test. Name it like any other commit, with `(consolidate <milestone>)` in parentheses.
 4. A finding that would change specified behavior or a published interface is not a refactor: ask the team.
 
-Then merge as usual and ask the team to confirm the milestone's done-when.
+Then merge as usual and ask the team to confirm the milestone's done-when by ticking its confirm step.
 
 ## Rules for the whole repository
 
@@ -59,7 +59,7 @@ Then merge as usual and ask the team to confirm the milestone's done-when.
 - **Fix a bug at its root.** Find every caller of the code you touch and fix the shared code once, not one caller.
 - **A fix comes with a test** that fails without it.
 - **Refactor in its own commit, never folded into a build step.** When a step can't be built cleanly without one, commit the refactor first on the same branch. Other mess you notice waits for the [consolidation pass](#consolidation-pass).
-- **Mark deliberate simplifications** with a `NOTE:` comment that names the limit and what lifts it: a step id, a decision id or a condition. [debt-ledger](.agents/skills/debt-ledger/SKILL.md) finds them once they're due.
+- **Mark deliberate simplifications** with a `NOTE:` comment that names the limit and what lifts it: a step id, an accepted decision's id or a condition. A NOTE never stands in for an open decision's answer. [debt-ledger](.agents/skills/debt-ledger/SKILL.md) finds them once they're due.
 - **Commit each change once its checks pass,** one commit per change, named `<area>: <what it does> (<step or decision id>)`.
 
 ## Commands

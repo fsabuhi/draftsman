@@ -9,14 +9,14 @@ Tutorlink is a marketplace where secondary-school students book one-to-one onlin
 
 ## Before you write code
 
-1. **Pick a step** from [the build order](docs/product.md#build-order), in the list you're working on: the first unticked step that isn't marked `(team)`, whose `(after …)` steps are all ticked on `main`, and that isn't waiting on a decision: no `open` row in [decisions.md](docs/decisions.md) names the step or its milestone under Needed by. If no step qualifies, stop and tell the team which decisions or team steps are in the way.
+1. **Pick a step** from [the build order](docs/product.md#build-order), in the list you're working on, in the earliest milestone whose confirm step isn't ticked on `main`: the first unticked step that isn't marked `(team)`, whose `(after …)` steps are all ticked there, and that isn't waiting on a decision: no `open` row in [decisions.md](docs/decisions.md) names the step, its milestone or its phase under Needed by, and nothing it builds depends on a `proposed` row. If no step qualifies, stop and tell the team which decisions or team steps are in the way.
 2. **Read** the step's feature file, then the shared docs and data keys it links to. Links into later phases are context, not scope.
 3. **Build the step and nothing else.** Its done-when is the bar: prove it with a test or a command.
-4. **Tick the step** once its done-when holds and the checks pass. When every step of a milestone is ticked, stop: the team confirms the milestone's done-when before the next milestone starts.
+4. **Tick the step** once its done-when holds and the checks pass. When every agent step of a milestone is ticked, stop: the team ticks the milestone's confirm step once its done-when holds, and only then does the next milestone start.
 
 ## When the spec doesn't say
 
-Stop and ask the team. Don't pick an answer and carry on, and don't write a test that picks one. Put the answer in its one home in the same change; if it's a choice the team will make later, add an `open` row to decisions.md that names the step it blocks. If only part of a step is blocked, split the step and build the unblocked part.
+Agents never decide; the team does. Stop and ask the team, with your recommendation. Don't pick an answer and carry on, don't stub the undecided part, and don't write a test that picks one. Put the answer in its one home in the same change; if the team will choose later, add an `open` row to decisions.md that names the step it blocks, and that step waits. If only part of a step is blocked, ask the team whether to split it; never split it yourself.
 
 ## Parallel sessions
 
