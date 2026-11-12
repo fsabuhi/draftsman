@@ -46,7 +46,7 @@ These docs are the spec the code is built from, so an agent building from them s
    - A rule that picks, computes, ranks or matches says how: its inputs, the rule, how ties break, and what happens when there's nothing to pick.
    - A counter says what it counts, when it's spent, when it resets and what happens at the limit.
    - A state lists every value it can take and what moves it from one to the next.
-8. **Run the check after every change:** `python3 scripts/check_spec.py`, and fix every problem it reports. `--fix` regenerates the feature index in `docs/README.md`. Never edit the checker to make a problem go away.
+8. **Run the check after every change:** `uv run scripts/check_spec.py` (plain `python3` works once PyYAML is installed or when no data file is YAML), and fix every problem it reports. `--fix` regenerates the feature index in `docs/README.md`. Never edit the checker to make a problem go away.
 
 ## Feature files
 

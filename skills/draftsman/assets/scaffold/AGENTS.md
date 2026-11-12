@@ -66,7 +66,7 @@ Then merge as usual and ask the team to confirm the milestone's done-when by tic
 
 | Task | Command |
 | --- | --- |
-| Check the spec, after any change to the docs | `python3 scripts/check_spec.py` |
-| Regenerate the feature index | `python3 scripts/check_spec.py --fix` |
+| Check the spec, after any change to the docs | `uv run scripts/check_spec.py`, which installs PyYAML for YAML data files; plain `python3` works once PyYAML is installed or when no data file is YAML |
+| Regenerate the feature index | `uv run scripts/check_spec.py --fix` |
 | Block commits that fail the checks, once per clone | `git config core.hooksPath .githooks` |
 <<fill: a row for each code folder: the one command that runs all of its checks>>

@@ -38,7 +38,7 @@ The skeleton is in `assets/scaffold/` in this skill's folder, with a `<<fill: â€
 3. **Accepted means the user said yes.** Mark a decision `accepted` only when the user stated or confirmed it. Your recommendations go in `open` rows, or in `proposed` rows when the user asks you to draft decisions for them to approve.
 4. **One home per fact.** Before writing a fact, find its home in the table in `docs/AGENTS.md`. If the fact already exists, link to it instead of restating it. When you move a fact, delete the old copy.
 5. **Lose nothing when migrating.** Every fact in the old docs lands in a home, or is listed as an exact duplicate. Nothing else is dropped without the user's yes, and old files are archived, not deleted, until the user approves the ledger.
-6. **The checker decides when you're done.** `python3 scripts/check_spec.py` has to pass in the final state. Fix the docs, never the checker, and never move or rename files to get around it.
+6. **The checker decides when you're done.** `uv run scripts/check_spec.py` has to pass in the final state. Fix the docs, never the checker, and never move or rename files to get around it.
 7. **Docs only.** Don't change application code, configuration or dependencies. Read code only as evidence for the spec. The scaffold's guides, skills and hook are part of the spec setup, not application code.
 8. **Leave the user in control of git.** Start from a clean working tree or a new branch, so the result is one diff the user can review. If there are uncommitted changes and nobody can be asked, go on, and name those files in your report. Don't commit unless the user asks.
 
@@ -70,8 +70,8 @@ Tell the user which mode you picked and why, in one line. If they asked for some
 
 ## The checker
 
-- Once the scaffold is copied, run `python3 scripts/check_spec.py` from the repository root.
-- Before that (during a migration or an audit of a repository without it), run this skill's copy against the repository: `python3 <this skill's folder>/assets/scaffold/scripts/check_spec.py --root <repo>`.
+- Once the scaffold is copied, run `uv run scripts/check_spec.py` from the repository root; plain `python3` works once PyYAML is installed or when no data file is YAML.
+- Before that (during a migration or an audit of a repository without it), run this skill's copy against the repository: `uv run <this skill's folder>/assets/scaffold/scripts/check_spec.py --root <repo>`.
 - YAML data files need PyYAML: use `uv run scripts/check_spec.py`, which installs it, or `pip install pyyaml`. If nothing can be installed, say so in your report; never skip the check without saying so.
 - Fix every problem it reports in the docs. `--fix` only regenerates the feature index in `docs/README.md`.
 

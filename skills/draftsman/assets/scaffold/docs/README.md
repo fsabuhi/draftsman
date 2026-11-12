@@ -8,7 +8,7 @@
 
 ## Features
 
-Generated from each feature's frontmatter by `python3 scripts/check_spec.py --fix`; don't edit it by hand.
+Generated from each feature's frontmatter by `uv run scripts/check_spec.py --fix`; don't edit it by hand.
 
 <!-- features:start -->
 <!-- features:end -->
