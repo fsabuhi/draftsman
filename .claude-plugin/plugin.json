@@ -1,6 +1,6 @@
 {
   "name": "draftsman",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Creates, migrates and audits app specs that coding agents can build from without guessing: one home per fact, every unknown a recorded decision, and a checker that fails while the spec has a gap.",
   "author": {
     "name": "fsabuhi",
