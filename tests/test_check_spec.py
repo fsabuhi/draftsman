@@ -30,6 +30,9 @@ def append(root, rel, text):
     path.write_text(path.read_text() + text)
 
 
+PLATFORM_DECISIONS, PLATFORM_DOC = "docs/platform/decisions.md", "docs/platform/sign-in.md"
+
+
 # (name, how to break the fixture, a phrase the problem report must contain)
 BREAKS = [
     ("placeholder word", lambda r: append(r, "docs/features/swaps.md", "\nPricing is TBD.\n"), "`TBD` leaves a gap"),
@@ -117,6 +120,47 @@ BREAKS = [
     ("missing required file", lambda r: (r / "docs/ideas.md").unlink(), "docs/ideas.md: missing"),
     ("bad frontmatter outside features", lambda r: edit(r, "docs/product.md", "decisions: [D-002]\n", "tags: [x]\n"),
      "frontmatter outside docs/features/ is exactly"),
+    # The platform layer: docs/platform/, which a template ships to every project built from it.
+    ("open platform decision", lambda r: edit(r, PLATFORM_DECISIONS, "| P-003 | 2026-11-04 | accepted |", "| P-003 | 2026-11-04 | open |"),
+     "P-003: `open` doesn't belong in docs/platform/decisions.md"),
+    ("proposed platform decision",
+     lambda r: edit(r, PLATFORM_DECISIONS, "| P-002 | 2026-10-05 | accepted |", "| P-002 | 2026-10-05 | proposed |"),
+     "P-002: `proposed` doesn't belong in docs/platform/decisions.md"),
+    ("open table in the platform decisions",
+     lambda r: append(r, PLATFORM_DECISIONS, "\n## Open\n\n| ID | Date | Status | Question | Recommendation | Needed by |\n"
+                                             "| --- | --- | --- | --- | --- | --- |\n"),
+     "holds one table, of accepted and superseded rows"),
+    ("app decision id in the platform decisions",
+     lambda r: append(r, PLATFORM_DECISIONS, "| D-005 | 2026-11-05 | accepted | Listings expire after a month | Stale listings waste trips | |\n"),
+     "`D-005` isn't a decision id like P-012"),
+    ("platform decisions header", lambda r: edit(r, PLATFORM_DECISIONS, "| Why | Supersedes |", "| Why |"),
+     "the table's header is | ID | Date | Status | Decision | Why | Supersedes |"),
+    ("app decision supersedes a platform decision", lambda r: edit(r, "docs/decisions.md", "| D-001 |\n", "| D-001, P-001 |\n"),
+     "D-002 can't supersede P-001"),
+    ("superseded platform row nothing names", lambda r: edit(r, PLATFORM_DECISIONS, "| P-001 |\n", "| |\n"),
+     "P-001 is superseded, but no row names it under Supersedes"),
+    ("platform row supersedes a missing platform row", lambda r: edit(r, PLATFORM_DECISIONS, "| P-001 |\n", "| P-001, P-009 |\n"),
+     "P-002 supersedes P-009, which doesn't exist"),
+    ("platform row supersedes a live app row",
+     lambda r: edit(r, "docs/decisions.md", "| D-004 | 2026-11-02 | superseded |", "| D-004 | 2026-11-02 | accepted |"),
+     "P-003 supersedes D-004, so mark D-004 `superseded`"),
+    ("unknown platform decision", lambda r: append(r, "docs/ideas.md", "- Per P-009.\n"),
+     "P-009 isn't in docs/platform/decisions.md"),
+    ("superseded platform citation", lambda r: append(r, "docs/ideas.md", "- Per P-001.\n"), "P-001 is superseded"),
+    ("code in both error tables",
+     lambda r: append(r, "docs/shared/errors.md", "| `code_expired` | 401 | The code is too old | Asks for a new code |\n"),
+     "`code_expired` is already in docs/platform/errors.md"),
+    ("platform code with the wrong status", lambda r: append(r, "docs/ideas.md", "- Fails with `code_expired` (403).\n"),
+     "`code_expired` is 401 in docs/platform/errors.md, not 403"),
+    ("platform doc cites an app decision", lambda r: append(r, PLATFORM_DOC, "\nListings follow D-002.\n"),
+     "D-002 is this project's own decision"),
+    ("platform decision cites an app decision outside Supersedes",
+     lambda r: edit(r, PLATFORM_DECISIONS, "not on messages |", "not on messages, as D-002 found |"),
+     "D-002 is this project's own decision"),
+    ("platform doc names an app error code", lambda r: append(r, PLATFORM_DOC, "\nA full shelf fails with `listing_full` (409).\n"),
+     "`listing_full` is this project's own error code"),
+    ("platform doc links outside its folder", lambda r: append(r, PLATFORM_DOC, "\nSee [listings](../features/listings.md).\n"),
+     "../features/listings.md is outside docs/platform/"),
 ]
 
 
@@ -158,6 +202,20 @@ class CheckSpec(unittest.TestCase):
 
     def test_superseded_rows_may_name_keys_that_moved(self):
         edit(self.root, "docs/decisions.md", "Listings carry a photo |", "Listings carry `limits.json → free.photos` photos |")
+        self.assertEqual(self.problems(), [])
+
+    def test_spec_without_platform_layer_passes(self):
+        """docs/platform/ is optional: without it, the doc that builds on it and the row it replaced, the spec passes."""
+        shutil.rmtree(self.root / "docs/platform")
+        (self.root / "docs/shared/sign-in.md").unlink()
+        edit(self.root, "docs/decisions.md", "| D-004 | 2026-11-02 | superseded | API errors carry an English message "
+                                             "and no code | One field is simpler | |\n", "")
+        problems, summary = check_spec.check(self.root)
+        self.assertEqual(problems, [])
+        self.assertEqual(summary, "Spec OK: 2 features, 3 decisions (1 open), 4 steps (1 ticked).")
+
+    def test_features_may_cite_platform_decisions(self):
+        edit(self.root, "docs/features/listings.md", "decisions: [D-002]", "decisions: [D-002, P-002]")
         self.assertEqual(self.problems(), [])
 
     def test_migration_archive_is_ignored(self):

@@ -23,7 +23,10 @@ from pathlib import Path
 
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)(?:\s+#+)?\s*$")
 LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
-DECISION = re.compile(r"\bD-\d{3,}\b")
+URL = re.compile(r"[a-z][a-z0-9+.-]*:", re.I)
+# D- ids are the project's own decisions; P- ids are the platform's, in docs/platform/decisions.md.
+DECISION = re.compile(r"\b[DP]-\d{3,}\b")
+APP_DECISION = re.compile(r"\bD-\d{3,}\b")
 STEP = re.compile(r"^- \[([ x])\] \*\*((\d+)\.\d+[a-z]?)\*\* (\S.*)$")
 STEP_LIKE = re.compile(r"^\s*[-*+] \[[ xX]\]")
 STEP_REF = re.compile(r"\b\d+\.\d+[a-z]?\b")
@@ -97,18 +100,25 @@ def cells(line: str) -> list[str]:
     return [c.strip() for c in re.split(r"(?<!\\)\|", line.strip())[1:-1]]
 
 
-def table(lines):
-    """[(line, cells)] of the first table in `lines`: the header row first, no separator row."""
-    rows, started = [], False
+def tables(lines):
+    """Each table in `lines` as [(line, cells)]: the header row first, no separator row."""
+    out, rows = [], None
     for n, line in lines:
         if line.lstrip().startswith("|"):
-            started = True
+            if rows is None:
+                rows = []
+                out.append(rows)
             row = cells(line)
             if not all(re.fullmatch(r":?-{3,}:?", c) for c in row):
                 rows.append((n, row))
-        elif started:
-            break
-    return rows
+        else:
+            rows = None
+    return out
+
+
+def table(lines):
+    """The first table in `lines`, or []."""
+    return next(iter(tables(lines)), [])
 
 
 def slug(title: str) -> str:
@@ -180,12 +190,15 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
     prose = {f: blank_fences(t) for f, t in texts.items()}
 
     phases, steps, milestones, roadmap_text = check_product(docs / "product.md", prose, err)
-    dec_path = docs / "decisions.md"
-    decisions = {}
+    dec_path, platform_dec = docs / "decisions.md", docs / "platform" / "decisions.md"
+    decisions, platform = {}, {}
     if dec_path in prose:
         decisions = parse_decisions(dec_path, numbered(prose[dec_path]), err)
-        check_decision_links(decisions, phases, steps, milestones, dec_path, err)
-        check_step_decisions(decisions, steps, docs / "product.md", err)
+    if platform_dec in prose:
+        platform = parse_platform_decisions(platform_dec, numbered(prose[platform_dec]), err)
+    rows = {**decisions, **platform}
+    check_decision_links(rows, phases, steps, milestones, err)
+    check_step_decisions(rows, steps, docs / "product.md", err)
 
     fdir = docs / "features"
     features: dict[str, tuple[str, str | None]] = {}
@@ -197,11 +210,21 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
     if not features:
         err(fdir, "the spec needs at least one feature file in docs/features/")
 
-    registry_path = docs / "shared" / "errors.md"
+    registry_path, platform_errors = docs / "shared" / "errors.md", docs / "platform" / "errors.md"
     registry = parse_registry(registry_path, prose, err)
+    platform_registry = parse_registry(platform_errors, prose, err)
+    codes: dict[str, tuple[str, str]] = {}  # each code's status and the table it's in
+    for path, reg in ((platform_errors, platform_registry), (registry_path, registry)):
+        for code, (status, n) in (reg or {}).items():
+            if code in codes:
+                err(path, f"`{code}` is already in {codes[code][1]}: each code is in one table only", n)
+            else:
+                codes[code] = (status, path.relative_to(root).as_posix())
+    code_tables = "docs/shared/errors.md" + (" or docs/platform/errors.md" if platform_registry is not None else "")
+    app_codes = {c for c, (_, home) in codes.items() if home == "docs/shared/errors.md"}
     data = load_data_files(docs / "data", err)
     # A superseded row is history: the keys it names may have moved since.
-    history = {r["line"] for r in decisions.values() if r["status"] == "superseded"}
+    history = {(r["path"], r["line"]) for r in rows.values() if r["status"] == "superseded"}
     endpoint_home: dict[str, tuple[Path, int]] = {}
     anchor_cache: dict[Path, set[str]] = {}
     for f in files:
@@ -213,7 +236,7 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
                     lineno(no_code, m.start()))
         for m in LINK.finditer(p):
             target = m.group(1)
-            if re.match(r"[a-z][a-z0-9+.-]*:", target, re.I):
+            if URL.match(target):
                 continue
             path_part, _, anchor = target.partition("#")
             dest = (f.parent / path_part).resolve() if path_part else f
@@ -224,12 +247,14 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
                     anchor_cache[dest] = anchors(dest.read_text(encoding="utf-8"))
                 if anchor not in anchor_cache[dest]:
                     err(f, f"broken anchor {target}", lineno(p, m.start()))
-        if f != dec_path and dec_path in prose:
+        if f not in (dec_path, platform_dec):
             for m in DECISION.finditer(p):
                 d, ln = m.group(0), lineno(p, m.start())
-                if d not in decisions:
-                    err(f, f"{d} isn't in decisions.md", ln)
-                elif decisions[d]["status"] == "superseded":
+                if d.startswith("D-") and dec_path not in prose:
+                    continue
+                if d not in rows:
+                    err(f, f"{d} isn't in {'docs/platform/' if d.startswith('P-') else ''}decisions.md", ln)
+                elif rows[d]["status"] == "superseded":
                     err(f, f"{d} is superseded: cite the decision that replaced it", ln)
         if f.parent != fdir and texts[f].startswith("---\n") and not OTHER_FM.match(texts[f]):
             err(f, "frontmatter outside docs/features/ is exactly three lines: ---, decisions: [D-001], ---", 1)
@@ -244,18 +269,21 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
                        "define each endpoint once and link to it", n)
             else:
                 endpoint_home[key] = (f, n)
-        if f != registry_path:
+        if f not in (registry_path, platform_errors):
             for m in ERROR_MENTION.finditer(p):
                 code, status, ln = m.group(1), m.group(2), lineno(p, m.start())
-                if registry is None:
+                if code in codes:
+                    if codes[code][0] != status:
+                        err(f, f"`{code}` is {codes[code][0]} in {codes[code][1]}, not {status}", ln)
+                elif registry is None:
                     err(f, f"`{code}` ({status}) is an error code, so it needs a row in docs/shared/errors.md", ln)
-                elif code not in registry:
-                    err(f, f"error code `{code}` isn't in docs/shared/errors.md", ln)
-                elif registry[code] != status:
-                    err(f, f"`{code}` is {registry[code]} in docs/shared/errors.md, not {status}", ln)
+                else:
+                    err(f, f"error code `{code}` isn't in {code_tables}", ln)
+        if docs / "platform" in f.parents:
+            check_platform_file(f, p, docs, f == platform_dec, app_codes, err)
         for m in DATA_REF.finditer(p):
             name, ln = m.group(1), lineno(p, m.start())
-            if f == dec_path and ln in history:
+            if (f, ln) in history:
                 continue
             key = m.group(2).split("<")[0].split("*")[0].strip().rstrip(".")
             if name not in data:
@@ -275,7 +303,8 @@ def check(root: Path, fix: bool = False) -> tuple[list[str], str]:
     lines = [f"{path}:{line}: {msg}" if line else f"{path}: {msg}" for path, line, msg in problems]
     n_open = sum(1 for d in decisions.values() if d["status"] == "open")
     n_ticked = sum(1 for s in steps.values() if s["ticked"])
-    summary = (f"Spec OK: {len(features)} features, {len(decisions)} decisions ({n_open} open), "
+    n_platform = f"{len(platform)} platform decisions, " if platform_dec in prose else ""
+    summary = (f"Spec OK: {len(features)} features, {len(decisions)} decisions ({n_open} open), {n_platform}"
                f"{len(steps)} steps ({n_ticked} ticked).")
     return lines, summary
 
@@ -384,45 +413,71 @@ def parse_decisions(path, lines, err):
         if not t or t[0][1] != header:
             err(path, f"the {title} table's header is | {' | '.join(header)} |", t[0][0] if t else 0)
             continue
-        for n, c in t[1:]:
-            if len(c) != 6:
-                err(path, f"a decision row has 6 cells; this one has {len(c)}", n)
-                continue
-            did, date, status = c[0], c[1], c[2]
-            if not re.fullmatch(r"D-\d{3,}", did):
-                err(path, f"`{did}` isn't a decision id like D-012", n)
-                continue
-            if did in rows:
-                err(path, f"{did} is defined twice", n)
-            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
-                err(path, f"{did}: the date is written YYYY-MM-DD", n)
-            if status not in statuses:
-                err(path, f"{did}: `{status}` doesn't belong in the {title} table "
-                          f"(it holds {', '.join(sorted(statuses))})", n)
-            empty = [header[i] for i in (3, 4) if not c[i]]
-            if title == "Open" and not c[5]:
-                empty.append("Needed by")
-            if empty:
-                err(path, f"{did}: fill in {' and '.join(empty)}", n)
-            rows[did] = {"status": status, "line": n, "cells": c, "open_table": title == "Open"}
+        parse_rows(path, t[1:], header, "D", statuses, f"the {title} table", rows, err)
     return rows
 
 
-def check_decision_links(rows, phases, steps, milestones, path, err):
+def parse_platform_decisions(path, lines, err):
+    """The platform's decisions: one table of P- rows, never open or proposed."""
+    found = [t for t in tables(lines) if t]
+    if not found or found[0][0][1] != ACCEPTED:
+        err(path, f"the table's header is | {' | '.join(ACCEPTED)} |", found[0][0][0] if found else 0)
+        return {}
+    for t in found[1:]:
+        err(path, "holds one table, of accepted and superseded rows: platform decisions are never open or proposed",
+            t[0][0])
+    rows = {}
+    parse_rows(path, found[0][1:], ACCEPTED, "P", {"accepted", "superseded"}, "docs/platform/decisions.md", rows, err)
+    return rows
+
+
+def parse_rows(path, body, header, prefix, statuses, where, rows, err):
+    """Adds each decision row in `body` to `rows`; `where` names the table in problems."""
+    open_table = header == OPEN
+    for n, c in body:
+        if len(c) != 6:
+            err(path, f"a decision row has 6 cells; this one has {len(c)}", n)
+            continue
+        did, date, status = c[0], c[1], c[2]
+        if not re.fullmatch(rf"{prefix}-\d{{3,}}", did):
+            err(path, f"`{did}` isn't a decision id like {prefix}-012", n)
+            continue
+        if did in rows:
+            err(path, f"{did} is defined twice", n)
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
+            err(path, f"{did}: the date is written YYYY-MM-DD", n)
+        if status not in statuses:
+            err(path, f"{did}: `{status}` doesn't belong in {where} (it holds {', '.join(sorted(statuses))})", n)
+        empty = [header[i] for i in (3, 4) if not c[i]]
+        if open_table and not c[5]:
+            empty.append("Needed by")
+        if empty:
+            err(path, f"{did}: fill in {' and '.join(empty)}", n)
+        rows[did] = {"status": status, "line": n, "cells": c, "open_table": open_table, "path": path}
+
+
+def check_decision_links(rows, phases, steps, milestones, err):
     named = set()
     for did, r in rows.items():
         if r["open_table"]:
             continue
+        path = r["path"]
         for old in DECISION.findall(r["cells"][5]):
             named.add(old)
-            if old not in rows:
-                err(path, f"{did} supersedes {old}, which doesn't exist", r["line"])
+            if did.startswith("D-") and old.startswith("P-"):
+                err(path, f"{did} can't supersede {old}: a project's own decision never replaces a platform decision",
+                    r["line"])
+            elif old not in rows:
+                # A P- row may name the D- rows of the project the platform came from.
+                if not (did.startswith("P-") and old.startswith("D-")):
+                    err(path, f"{did} supersedes {old}, which doesn't exist", r["line"])
             elif rows[old]["status"] != "superseded":
                 err(path, f"{did} supersedes {old}, so mark {old} `superseded`", r["line"])
     for did, r in rows.items():
+        path = r["path"]
         if r["status"] == "superseded" and did not in named:
             err(path, f"{did} is superseded, but no row names it under Supersedes", r["line"])
-        if r["status"] != "open":
+        if r["status"] != "open" or did.startswith("P-"):
             continue
         need = r["cells"][5]
         named_steps = re.findall(r"\bstep\s+(\d+\.\d+[a-z]?)", need, re.I)
@@ -507,7 +562,7 @@ def check_feature(path, text, phases, roadmap_text, err):
 
 
 def parse_registry(path, prose, err):
-    """The error codes in docs/shared/errors.md, or None when the project has none."""
+    """The error codes in an errors.md, as {code: (status, line)}, or None when the file doesn't exist."""
     if path not in prose:
         return None
     t = table(numbered(prose[path]))
@@ -522,8 +577,32 @@ def parse_registry(path, prose, err):
             continue
         if m.group(1) in registry:
             err(path, f"`{m.group(1)}` is defined twice", n)
-        registry[m.group(1)] = row[1]
+        registry[m.group(1)] = (row[1], n)
     return registry
+
+
+def check_platform_file(path, text, docs, is_decisions, app_codes, err):
+    """docs/platform/ is the same in every project built from the template, so it names nothing of one project's."""
+    platform, data = (docs / "platform").resolve(), (docs / "data").resolve()
+    for n, line in numbered(text):
+        if is_decisions and line.lstrip().startswith("|"):
+            line = "|".join(cells(line)[:5])  # a Supersedes cell may name the D- rows a platform row replaced
+        for m in APP_DECISION.finditer(line):
+            err(path, f"{m.group(0)} is this project's own decision: docs/platform/ is the same in every project, "
+                      "so it cites only P- ids", n)
+    for m in ERROR_MENTION.finditer(text):
+        if m.group(1) in app_codes:
+            err(path, f"`{m.group(1)}` is this project's own error code: docs/platform/ is the same in every "
+                      "project, so it names only the codes in docs/platform/errors.md", lineno(text, m.start()))
+    for m in LINK.finditer(text):
+        target = m.group(1)
+        path_part = target.partition("#")[0]
+        if URL.match(target) or not path_part:
+            continue
+        dest = (path.parent / path_part).resolve()
+        if not (dest == platform or platform in dest.parents or data in dest.parents):
+            err(path, f"{target} is outside docs/platform/: the folder is the same in every project, "
+                      "so it links only inside itself and to docs/data/", lineno(text, m.start()))
 
 
 def load_data_files(ddir, err):
