@@ -20,7 +20,7 @@ docs/
   AGENTS.md            the rules and formats for everything below (read it before writing)
   README.md            entry point, with a generated feature index
   product.md           vision, phases and gates, and the build order
-  decisions.md         every decision: accepted, proposed, open or superseded
+  decisions.md         the project's decisions: accepted, proposed, open or superseded
   features/<slug>.md   one per feature: Behavior (with Done when) and Implementation
   shared/<topic>.md    facts two or more features use: architecture, data model, errors
   data/<name>.yaml     numbers the code reads, referenced by key from the prose

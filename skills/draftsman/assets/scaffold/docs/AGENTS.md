@@ -16,6 +16,7 @@ These docs are the spec the code is built from, so an agent building from them s
 | Anything two or more features use | `docs/shared/<topic>.md` |
 | A number or list the code reads: limits, caps, prices it charges, formula parameters | `docs/data/<name>.yaml`, `.toml` or `.json` |
 | An error code | `docs/shared/errors.md` |
+| A decision, error code or shared fact that a template gives every project built from it | `docs/platform/`, changed only in the template ([the platform layer](#the-platform-layer)) |
 | Something we refuse to build | `docs/never.md` |
 | An idea nobody has decided on | `docs/ideas.md`, one line |
 | A risk and its guardrail | `docs/risks.md` |
@@ -74,7 +75,7 @@ Order and progress live in the build order and history lives in git, so feature 
 | ID | Date | Status | Question | Recommendation | Needed by |
 ```
 
-The first holds `accepted`, `proposed` and `superseded` rows; the second holds `open` rows. An id is `D-` and three digits, never reused. To resolve an open row, move it to the first table under the same id, with the answer under Decision and the reasoning under Why.
+The first holds `accepted`, `proposed` and `superseded` rows; the second holds `open` rows. An id here is `D-` and three digits, never reused; platform decisions have `P-` ids ([the platform layer](#the-platform-layer)). To resolve an open row, move it to the first table under the same id, with the answer under Decision and the reasoning under Why.
 
 ## Build order
 
@@ -112,8 +113,19 @@ Team:
 
 ## Error codes
 
-When the project has error codes, `docs/shared/errors.md` is their one home: a single table that starts `| Code | Status |`. Other docs name a code with its status, and the checker matches each mention against the table:
+When the project has error codes of its own, `docs/shared/errors.md` is their one home: a single table that starts `| Code | Status |`. With [a platform layer](#the-platform-layer), its codes are in `docs/platform/errors.md`, in the same format, and no code is in both tables. Other docs name a code with its status, and the checker matches each mention against the tables:
 
 ```markdown
 Past the cap, the request fails with `limit_reached` (429).
 ```
+
+## The platform layer
+
+A project built from a template keeps the template's own decisions and shared docs in `docs/platform/`. Every project built from the template gets the same copy, so only the template changes the folder. The project never edits it, and keeps its own decisions and docs where the rest of this guide puts them. Without the folder, this section doesn't apply.
+
+- `docs/platform/decisions.md` holds one table, with the header of the first table in `docs/decisions.md`. Its ids are `P-` and three digits, never reused. Its rows are only `accepted` or `superseded`: the platform has no open or proposed decisions.
+- `docs/platform/errors.md` holds the platform's error codes, in the format of [the error codes](#error-codes).
+- Every other file in `docs/platform/` is a shared doc, and follows the rules a file in `docs/shared/` follows.
+- The project's docs, features and frontmatter may cite `P-` ids, and the checker resolves them as it does `D-` ids.
+- Supersedes works across the two decision files: a `superseded` row in either is named under Supersedes by a row in either. A `P-` row may name `D-` rows. One this project has is marked `superseded`; one it doesn't have is history from the project the platform came from. A `D-` row never names a `P-` row, since a project can't replace a platform decision.
+- The folder stands on its own. Nothing in it cites a `D-` id, names an error code from `docs/shared/errors.md`, or links outside `docs/platform/` except to files in `docs/data/`. The one exception is the Supersedes cells of `docs/platform/decisions.md`, which may name `D-` rows.
