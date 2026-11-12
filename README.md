@@ -57,6 +57,7 @@ The guide also carries a build workflow that runs without someone watching every
 - An error code that isn't in the registry, or that's used with the wrong status.
 - A reference like `limits.yaml → free.plans_per_week` to a file or key that doesn't exist.
 - A refusal in never.md that doesn't cite a decision, or a feature index that's out of date.
+- With a platform layer (`docs/platform/`, the decisions and docs a template gives every project built from it): a `P-` decision that's open or proposed, a project decision that replaces a platform one, an error code in both tables, or a platform doc that cites a project decision, names a project error code or links outside the folder.
 
 Turn the hook on with `git config core.hooksPath .githooks`, and copy [spec-check.yml](skills/draftsman/assets/spec-check.yml) into `.github/workflows/` to run the same check in CI.
 
