@@ -28,7 +28,7 @@ Done when a tester can list a book on staging.
 Backend:
 
 - [x] **1.1** The API skeleton and CI
-- [ ] **1.2** Creating listings (after 1.1; D-002)
+- [ ] **1.2** Creating listings (after 1.1, platform 1.1; D-002)
   - Done when: an API test creates a listing and gets `listing_full` (409) past the cap.
 
 Team:

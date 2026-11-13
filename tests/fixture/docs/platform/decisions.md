@@ -2,8 +2,16 @@
 
 The decisions of the template this project is built from. Only the template changes them.
 
+## Accepted and proposed
+
 | ID | Date | Status | Decision | Why | Supersedes |
 | --- | --- | --- | --- | --- | --- |
 | P-001 | 2026-10-01 | superseded | Users sign in with a password | The starter shipped with it | D-010 |
 | P-002 | 2026-10-05 | accepted | Users sign in with a one-time code sent by email | Passwords get reused and leaked | P-001 |
 | P-003 | 2026-11-04 | accepted | Every API error carries a code from an error table | Clients branch on codes, not on messages | D-004 |
+
+## Open
+
+| ID | Date | Status | Question | Recommendation | Needed by |
+| --- | --- | --- | --- | --- | --- |
+| P-004 | 2026-11-06 | open | Which provider sends the sign-in emails? | One with a free tier and a sandbox | Step 1.2 |

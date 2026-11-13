@@ -30,7 +30,23 @@ def append(root, rel, text):
     path.write_text(path.read_text() + text)
 
 
+def edits(root, *changes):
+    """Several edits, each (rel, old, new)."""
+    for rel, old, new in changes:
+        edit(root, rel, old, new)
+
+
+def one_platform_table(root):
+    """docs/platform/decisions.md as Draftsman 0.4 wrote it: one table, no open rows, nothing waiting on them."""
+    path = root / "docs/platform/decisions.md"
+    text = path.read_text()
+    text = text.replace("## Accepted and proposed\n\n", "")
+    path.write_text(text[:text.index("## Open")].rstrip("\n") + "\n")
+    edit(root, "docs/platform/build-order.md", "(after 1.1; P-004)", "(after 1.1)")
+
+
 PLATFORM_DECISIONS, PLATFORM_DOC = "docs/platform/decisions.md", "docs/platform/sign-in.md"
+PLATFORM_ORDER = "docs/platform/build-order.md"
 
 
 # (name, how to break the fixture, a phrase the problem report must contain)
@@ -58,12 +74,16 @@ BREAKS = [
      "`accepted` doesn't belong in the Open table"),
     ("step without done-when", lambda r: edit(r, "docs/product.md", "  - Done when: an API test", "  - Proof: an API test"),
      "step 1.2 needs an indented `- Done when: …` line"),
-    ("step after a missing step", lambda r: edit(r, "docs/product.md", "(after 1.1;", "(after 1.9;"),
+    ("step after a missing step", lambda r: edit(r, "docs/product.md", "(after 1.1,", "(after 1.9,"),
      "step 1.2 comes after step 1.9"),
-    ("after sharing its parentheses", lambda r: edit(r, "docs/product.md", "(after 1.1; D-002)", "(D-002; after 1.9)"),
+    ("after sharing its parentheses",
+     lambda r: edit(r, "docs/product.md", "(after 1.1, platform 1.1; D-002)", "(D-002; after 1.9, platform 1.1)"),
+     "step 1.2 comes after step 1.9"),
+    ("missing step after a platform step",
+     lambda r: edit(r, "docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after platform 1.1 and 1.9; D-002)"),
      "step 1.2 comes after step 1.9"),
     ("step names an open decision that doesn't hold it",
-     lambda r: edit(r, "docs/product.md", "(after 1.1; D-002)", "(after 1.1; D-002, D-003)"),
+     lambda r: edit(r, "docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after 1.1, platform 1.1; D-002, D-003)"),
      "step 1.2 names D-003, which is open but doesn't hold the step back"),
     ("step builds on a proposed decision",
      lambda r: edit(r, "docs/decisions.md", "| accepted | Listings carry no photo", "| proposed | Listings carry no photo"),
@@ -121,20 +141,81 @@ BREAKS = [
     ("bad frontmatter outside features", lambda r: edit(r, "docs/product.md", "decisions: [D-002]\n", "tags: [x]\n"),
      "frontmatter outside docs/features/ is exactly"),
     # The platform layer: docs/platform/, which a template ships to every project built from it.
-    ("open platform decision", lambda r: edit(r, PLATFORM_DECISIONS, "| P-003 | 2026-11-04 | accepted |", "| P-003 | 2026-11-04 | open |"),
-     "P-003: `open` doesn't belong in docs/platform/decisions.md"),
-    ("proposed platform decision",
-     lambda r: edit(r, PLATFORM_DECISIONS, "| P-002 | 2026-10-05 | accepted |", "| P-002 | 2026-10-05 | proposed |"),
-     "P-002: `proposed` doesn't belong in docs/platform/decisions.md"),
-    ("open table in the platform decisions",
-     lambda r: append(r, PLATFORM_DECISIONS, "\n## Open\n\n| ID | Date | Status | Question | Recommendation | Needed by |\n"
-                                             "| --- | --- | --- | --- | --- | --- |\n"),
-     "holds one table, of accepted and superseded rows"),
+    ("open row in the platform's accepted table",
+     lambda r: edit(r, PLATFORM_DECISIONS, "| P-003 | 2026-11-04 | accepted |", "| P-003 | 2026-11-04 | open |"),
+     "P-003: `open` doesn't belong in the Accepted and proposed table"),
+    ("platform decisions in one table, as before 0.5.0", lambda r: one_platform_table(r),
+     "holds the two tables of docs/decisions.md, under `## Accepted and proposed` and `## Open`, since Draftsman 0.5.0"),
     ("app decision id in the platform decisions",
-     lambda r: append(r, PLATFORM_DECISIONS, "| D-005 | 2026-11-05 | accepted | Listings expire after a month | Stale listings waste trips | |\n"),
+     lambda r: edit(r, PLATFORM_DECISIONS, "| P-004 |", "| D-005 |"),
      "`D-005` isn't a decision id like P-012"),
     ("platform decisions header", lambda r: edit(r, PLATFORM_DECISIONS, "| Why | Supersedes |", "| Why |"),
-     "the table's header is | ID | Date | Status | Decision | Why | Supersedes |"),
+     "the Accepted and proposed table's header is | ID | Date | Status | Decision | Why | Supersedes |"),
+    ("open platform row blocks nothing", lambda r: edit(r, PLATFORM_DECISIONS, "| Step 1.2 |", "| soon |"),
+     "P-004: Needed by names what it blocks: a step (Step 2.3) or a milestone (Milestone 4) of docs/platform/build-order.md"),
+    ("open platform row names a phase", lambda r: edit(r, PLATFORM_DECISIONS, "| Step 1.2 |", "| `mvp` |"),
+     "P-004: Needed by names what it blocks"),
+    ("open platform row blocks a missing platform step", lambda r: edit(r, PLATFORM_DECISIONS, "| Step 1.2 |", "| Step 2.1 |"),
+     "P-004 is needed by platform step 2.1, which isn't in docs/platform/build-order.md"),
+    ("open platform row blocks a ticked platform step", lambda r: edit(r, PLATFORM_DECISIONS, "| Step 1.2 |", "| Step 1.1 |"),
+     "step 1.1 is ticked, but P-004"),
+    ("platform step names an open platform row that doesn't hold it",
+     lambda r: edit(r, PLATFORM_DECISIONS, "| Step 1.2 |", "| Step 1.3 |"),
+     "build-order.md:12: step 1.2 names P-004, which is open but doesn't hold the step back"),
+    ("open platform row cites an app decision",
+     lambda r: edit(r, PLATFORM_DECISIONS, "| Step 1.2 |", "| Step 1.2, as D-002 needs |"),
+     "D-002 is this project's own decision"),
+    ("proposed platform row a platform step builds on",
+     lambda r: edits(r, (PLATFORM_DECISIONS, "| P-003 | 2026-11-04 | accepted |", "| P-003 | 2026-11-04 | proposed |"),
+                     (PLATFORM_ORDER, "(after 1.1; P-004)", "(after 1.1; P-003, P-004)")),
+     "build-order.md:12: step 1.2 names P-003, which is only proposed: the team accepts it first"),
+    ("project step names a proposed platform row",
+     lambda r: edits(r, (PLATFORM_DECISIONS, "| P-003 | 2026-11-04 | accepted |", "| P-003 | 2026-11-04 | proposed |"),
+                     ("docs/product.md", "platform 1.1; D-002)", "platform 1.1; D-002, P-003)")),
+     "product.md:31: step 1.2 names P-003, which is only proposed: nothing builds on it until the template's team"),
+    ("project step waits for an open platform row through a ticked platform step",
+     lambda r: edits(r, (PLATFORM_DECISIONS, "| Step 1.2 |", "| Milestone 1 |"),
+                     ("docs/product.md", "platform 1.1; D-002)", "platform 1.1; D-002, P-004)")),
+     "step 1.2 names P-004, an open platform decision: make it wait (after platform …) for an unticked platform step"),
+    ("platform word the (after …) doesn't read",
+     lambda r: edit(r, "docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after 1.1, platform step 1.1; D-002)"),
+     "step 1.2: in (after …), each platform step is written `platform 2.1`, one `platform` per id"),
+    ("open platform row with no platform build order",
+     lambda r: edits(r, ("docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after 1.1; D-002)"))
+     or (r / PLATFORM_ORDER).unlink(),
+     "P-004 is needed by the platform's build order, but there's no docs/platform/build-order.md"),
+    ("platform build order without its heading", lambda r: edit(r, PLATFORM_ORDER, "# Build order\n", "# Platform plan\n"),
+     "starts with a `# Build order` heading"),
+    ("platform step after a missing platform step", lambda r: edit(r, PLATFORM_ORDER, "(after 1.1; P-004)", "(after 1.9; P-004)"),
+     "step 1.2 comes after step 1.9, which isn't another step in the platform's build order"),
+    ("project step names an open platform row without waiting for it",
+     lambda r: edit(r, "docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after 1.1; D-002, P-004)"),
+     "step 1.2 names P-004, an open platform decision: make it wait (after platform …)"),
+    ("project step waits for a missing platform step",
+     lambda r: edit(r, "docs/product.md", "platform 1.1;", "platform 1.9;"),
+     "step 1.2 comes after platform step 1.9, which isn't in docs/platform/build-order.md"),
+    ("project step waits for a platform step with no platform build order",
+     lambda r: (r / PLATFORM_ORDER).unlink(),
+     "step 1.2 comes after platform step 1.1, but there's no docs/platform/build-order.md"),
+    ("project step ticked before its platform step",
+     lambda r: edit(r, "docs/product.md", "- [ ] **1.2** Creating listings (after 1.1, platform 1.1;",
+                    "- [x] **1.2** Creating listings (after 1.1, platform 1.2;"),
+     "step 1.2 is ticked, but platform step 1.2, which it comes after, isn't ticked"),
+    ("platform step names a platform step with the prefix",
+     lambda r: edit(r, PLATFORM_ORDER, "(after 1.1; P-004)", "(after platform 1.1; P-004)"),
+     "names other platform steps by number alone"),
+    ("platform milestone without a confirm step",
+     lambda r: edit(r, PLATFORM_ORDER, "Confirm milestone 1's done-when (team)", "Final check (team)"),
+     "build-order.md:5: milestone 1 needs a `Confirm milestone 1's done-when (team)` step"),
+    ("platform milestone headed like the project's",
+     lambda r: edit(r, PLATFORM_ORDER, "## 1. Sign-in", "#### 1. Sign-in"),
+     "the platform's build order needs at least one milestone, headed `## 1. <name>`"),
+    ("platform step without done-when",
+     lambda r: edit(r, PLATFORM_ORDER, "  - Done when: an API test sends", "  - Proof: an API test sends"),
+     "build-order.md:12: step 1.2 needs an indented `- Done when: …` line"),
+    ("platform build order cites an app decision",
+     lambda r: edit(r, PLATFORM_ORDER, "(after 1.1; P-004)", "(after 1.1; P-004, D-002)"),
+     "D-002 is this project's own decision"),
     ("app decision supersedes a platform decision", lambda r: edit(r, "docs/decisions.md", "| D-001 |\n", "| D-001, P-001 |\n"),
      "D-002 can't supersede P-001"),
     ("superseded platform row nothing names", lambda r: edit(r, PLATFORM_DECISIONS, "| P-001 |\n", "| |\n"),
@@ -193,7 +274,43 @@ class CheckSpec(unittest.TestCase):
 
     def test_open_decision_held_through_an_earlier_step(self):
         """D-003 holds step 1.3, so a step that comes after 1.3 waits for it too."""
-        edit(self.root, "docs/product.md", "(after 1.1; D-002)", "(after 1.1, 1.3; D-002, D-003)")
+        edit(self.root, "docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after 1.1, 1.3; D-002, D-003)")
+        self.assertEqual(self.problems(), [])
+
+    def test_open_platform_decision_held_through_a_platform_step(self):
+        """P-004 holds platform step 1.2, so a project step that comes after it waits for P-004 too."""
+        edit(self.root, "docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after platform 1.2, 1.1; D-002, P-004)")
+        self.assertEqual(self.problems(), [])
+
+    def test_open_platform_decision_held_through_project_and_platform_chains(self):
+        """Project 1.5 waits for project 1.2, which waits for platform 1.5, which waits for platform 1.2, which P-004 holds."""
+        edits(self.root, ("docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after 1.1, platform 1.5; D-002)"),
+              (PLATFORM_ORDER, "\nTeam:\n", "- [ ] **1.5** Codes in the user's language (after 1.2)\n"
+                                            "  - Done when: an API test gets a code in French.\n\nTeam:\n"))
+        append(self.root, "docs/product.md", "")
+        edit(self.root, "docs/product.md", "\nTeam:\n", "- [ ] **1.5** Listing expiry (after 1.2; P-004)\n"
+                                                      "  - Done when: an API test expires a listing.\n\nTeam:\n")
+        self.assertEqual(self.problems(), [])
+
+    def test_one_platform_table_still_resolves_its_rows(self):
+        """A 0.4 platform decisions file gets one problem, not one per citation of its rows."""
+        one_platform_table(self.root)
+        found = self.problems()
+        self.assertEqual(len(found), 1, found)
+        self.assertIn("since Draftsman 0.5.0", found[0])
+
+    def test_summary_counts_platform_decisions_and_steps(self):
+        problems, summary = check_spec.check(self.root)
+        self.assertEqual(problems, [])
+        self.assertEqual(summary, "Spec OK: 2 features, 4 decisions (1 open), 4 platform decisions (1 open), "
+                                  "4 steps (1 ticked), 3 platform steps (1 ticked).")
+
+    def test_proposed_platform_decision_is_allowed(self):
+        edit(self.root, PLATFORM_DECISIONS, "| P-003 | 2026-11-04 | accepted |", "| P-003 | 2026-11-04 | proposed |")
+        self.assertEqual(self.problems(), [])
+
+    def test_platform_decisions_may_hold_an_open_row_for_a_milestone(self):
+        edit(self.root, PLATFORM_DECISIONS, "| Step 1.2 |", "| Milestone 1 |")
         self.assertEqual(self.problems(), [])
 
     def test_team_step_may_name_the_decision_it_answers(self):
@@ -208,6 +325,7 @@ class CheckSpec(unittest.TestCase):
         """docs/platform/ is optional: without it, the doc that builds on it and the row it replaced, the spec passes."""
         shutil.rmtree(self.root / "docs/platform")
         (self.root / "docs/shared/sign-in.md").unlink()
+        edit(self.root, "docs/product.md", "(after 1.1, platform 1.1; D-002)", "(after 1.1; D-002)")
         edit(self.root, "docs/decisions.md", "| D-004 | 2026-11-02 | superseded | API errors carry an English message "
                                              "and no code | One field is simpler | |\n", "")
         problems, summary = check_spec.check(self.root)
