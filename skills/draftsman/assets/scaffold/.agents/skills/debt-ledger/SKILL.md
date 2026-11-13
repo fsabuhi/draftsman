@@ -30,6 +30,8 @@ For each row, find what it waits for and check it:
 
 - A step id: ticked in [the build order](../../../docs/product.md#build-order)
   on the shared `main` (AGENTS.md)? Then it is **due**.
+- A platform step id, like `platform 2.1`: ticked in
+  `docs/platform/build-order.md` on the shared `main`? Then it is **due**.
 - A decision id: `accepted` in [decisions.md](../../../docs/decisions.md),
   or in `docs/platform/decisions.md` for a `P-` id? Then it is **due**.
 - A condition ("once the worker exists"): true in the code now? Then it is

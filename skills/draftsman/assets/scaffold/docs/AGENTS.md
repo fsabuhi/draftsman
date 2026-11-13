@@ -16,7 +16,7 @@ These docs are the spec the code is built from, so an agent building from them s
 | Anything two or more features use | `docs/shared/<topic>.md` |
 | A number or list the code reads: limits, caps, prices it charges, formula parameters | `docs/data/<name>.yaml`, `.toml` or `.json` |
 | An error code | `docs/shared/errors.md` |
-| A decision, error code or shared fact that a template gives every project built from it | `docs/platform/`, changed only in the template ([the platform layer](#the-platform-layer)) |
+| A decision, error code, shared fact or build step that a template gives every project built from it | `docs/platform/`, changed only in the template ([the platform layer](#the-platform-layer)) |
 | Something we refuse to build | `docs/never.md` |
 | An idea nobody has decided on | `docs/ideas.md`, one line |
 | A risk and its guardrail | `docs/risks.md` |
@@ -121,9 +121,11 @@ Past the cap, the request fails with `limit_reached` (429).
 
 ## The platform layer
 
-A project built from a template keeps the template's own decisions and shared docs in `docs/platform/`. Every project built from the template gets the same copy, so only the template changes the folder. The project never edits it, and keeps its own decisions and docs where the rest of this guide puts them. Without the folder, this section doesn't apply.
+A project built from a template keeps the template's own decisions, shared docs and build order in `docs/platform/`. Every project built from the template gets the same copy, so only the template changes the folder. The project never edits it, and keeps its own decisions and docs where the rest of this guide puts them. Without the folder, this section doesn't apply.
 
-- `docs/platform/decisions.md` holds one table, with the header of the first table in `docs/decisions.md`. Its ids are `P-` and three digits, never reused. Its rows are only `accepted` or `superseded`: the platform has no open or proposed decisions.
+- `docs/platform/decisions.md` holds the two tables of [the decisions](#decisions), under the same headings. Its ids are `P-` and three digits, never reused. An open row names under Needed by the step or milestone of the platform's build order that it blocks; the platform has no phases.
+- `docs/platform/build-order.md` is the platform's build order: a `# Build order` heading, a short introduction, then only its milestones, headed `## <n>. <name>`, each in the format of [the build order](#build-order). The template's repository builds its steps, and this project's agents never take one. A step of this project that needs one waits for it with `platform` before each platform id, as in `(after 3.4, platform 2.1, platform 2.2)`; it's done once it's ticked in this repository's copy, which the template's updates bring. A ticked step never comes after an unticked platform step.
+- An open `P-` row holds back only platform steps, so a step of this project that needs its answer comes `(after platform …)` an unticked platform step the row holds. Like any proposed row, a proposed `P-` row is built on only once the template's team accepts it.
 - `docs/platform/errors.md` holds the platform's error codes, in the format of [the error codes](#error-codes).
 - Every other file in `docs/platform/` is a shared doc, and follows the rules a file in `docs/shared/` follows.
 - The project's docs, features and frontmatter may cite `P-` ids, and the checker resolves them as it does `D-` ids.

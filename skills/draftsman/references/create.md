@@ -73,7 +73,7 @@ Write in this order, since each part leans on the ones before it:
    - Each step is one sentence of scope, small enough for one agent session, with a `Done when:` that a test or a command proves. A `(team)` step's done-when names the outcome and who confirms it.
    - Work only people can do (accounts and keys, store listings, legal text, content, reviews, paid services) is a `(team)` step, placed before the step that needs it.
    - A step that an open decision blocks waits for it: name the step under the decision's Needed by, or make it come `(after …)` a step that's named. When only part of a step is blocked, ask the user whether to split off the unblocked part.
-   - On a base, keep its milestones and ticked steps as they are, and number new milestones after them.
+   - On a base, keep its milestones and ticked steps as they are, and number new milestones after them. A base built from a template may hold the platform's build order in `docs/platform/build-order.md`: never add to it or edit it. A step that needs platform work waits for that platform step with `(after platform 2.1)`; platform work the build order lacks is a question for the user, since only the template can add it.
    - When the MVP has more unticked agent steps than the budget decision allows, don't cut on your own. List the features that could move to `after-launch`, the least needed first, with what each move saves, and ask.
 9. Fill in the remaining `<<fill: …>>` markers in AGENTS.md, docs/AGENTS.md and docs/README.md.
 
