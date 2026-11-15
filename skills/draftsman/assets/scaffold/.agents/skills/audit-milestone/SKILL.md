@@ -70,7 +70,7 @@ tested and fixed later. This is a report someone asked for, so give it in full.
   fixtures, config, and string or dynamic references.
 - A deliberate simplification marked with a `NOTE:` comment that names its limit is a
   decision, not a finding, unless the expected load already crosses it or the step it
-  waits for is ticked on the shared `main` (AGENTS.md).
+  waits for is ticked on the shared branch (AGENTS.md).
 - Propose the smallest fix that works. Prefer fixes that delete code. Never
   add layers, frameworks or config the problem does not need.
 - No style taste, no "consider", no vague worries.

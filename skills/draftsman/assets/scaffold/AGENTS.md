@@ -11,10 +11,10 @@
 
 ## Before you write code
 
-1. **Pick a step** from [the build order](docs/product.md#build-order), in the list you're working on, in the earliest milestone whose confirm step isn't ticked on the shared `main`: the first unticked step that isn't marked `(team)`, whose `(after …)` steps are all ticked there (a `platform 2.1` one in `docs/platform/build-order.md`), that nobody has taken (see [Parallel sessions](#parallel-sessions)), and that isn't waiting on a decision: no `open` row in [decisions.md](docs/decisions.md) names the step, its milestone or its phase under Needed by, and nothing it builds depends on a `proposed` row. An open row in `docs/platform/decisions.md` holds back only the platform's own steps, which the template's repository builds; a step here that needs its answer waits for one of them. If no step qualifies, stop and tell the team which decisions, team steps or platform steps are in the way.
+1. **Pick a step** from [the build order](docs/product.md#build-order), in the list you're working on, in the earliest milestone whose confirm step isn't ticked on the shared branch, or in the next milestone once that one's consolidation pass has merged, never further ahead: the first unticked step that isn't marked `(team)`, whose `(after …)` steps are all ticked there (a `platform 2.1` one in `docs/platform/build-order.md`), that nobody has taken (see [Parallel sessions](#parallel-sessions)), and that isn't waiting on a decision: no `open` row in [decisions.md](docs/decisions.md) names the step, its milestone or its phase under Needed by, and nothing it builds depends on a `proposed` row. An open row in `docs/platform/decisions.md` holds back only the platform's own steps, which the template's repository builds; a step here that needs its answer waits for one of them. If no step qualifies, stop and tell the team which decisions, team steps or platform steps are in the way.
 2. **Read** the step's feature file, then the shared docs and data keys it links to. Links into later phases are context, not scope.
 3. **Build the step and nothing else.** Its done-when is the bar: prove it with a test or a command.
-4. **Tick the step** on its branch once its done-when holds and the checks pass, so the tick lands with the step. When every agent step of a milestone is ticked, run the [consolidation pass](#consolidation-pass), then stop: the team ticks the milestone's confirm step once its done-when holds, and only then does the next milestone start.
+4. **Tick the step** on its branch once its done-when holds and the checks pass, so the tick lands with the step. When every agent step of a milestone is ticked, run the [consolidation pass](#consolidation-pass). Once it merges, go on to the next milestone while the team checks the milestone's done-when and ticks its confirm step, but never more than one milestone past the earliest one whose confirm step isn't ticked; a fix the team's check asks for comes before any other step.
 
 ## When the spec doesn't say
 
@@ -24,20 +24,20 @@ Agents never decide; the team does. Stop and ask the team, with your recommendat
 
 Agents can work at the same time, one per build-order list; two on the same list would pick the same step. Git is the shared state, so there's no status file to keep up to date.
 
-**The shared `main`** is `origin/main` after `git fetch origin` when the repository has a remote, and the local `main` when it has none. Read the build order there, never from a stale local copy. A step is done once it's ticked on the shared `main`. It's taken while a branch named `step-<id>` exists: check `git branch --list 'step-*'` and, with a remote, `git ls-remote --heads origin 'step-*'` and the open pull requests.
+**The shared branch** is `dev` when the repository has one, where work lands before it reaches `main`, and otherwise `main`: `origin/<branch>` after `git fetch origin` when the repository has a remote, and the local branch when it has none. Read the build order there, never from a stale local copy. A step is done once it's ticked on the shared branch. It's taken while a branch named `step-<id>` exists: check `git branch --list 'step-*'` and, with a remote, `git ls-remote --heads origin 'step-*'` and the open pull requests.
 
-1. **One worktree per change, named for it.** Never edit or commit in the root checkout. Branch from the shared `main`: `git worktree add .worktrees/<id> -b step-<id> origin/main`, or `main` without a remote, using a short name instead of `step-<id>` for a change that isn't a step. With a remote, push the branch straight away so other machines see the claim.
-2. **Commit each change once its checks pass**, then rebase onto the shared `main` and rerun the checks. Never merge `main` into a branch. When a rebase conflicts in a generated file, rerun its generator instead of merging it by hand.
+1. **One worktree per change, named for it.** Never edit or commit in the root checkout. Branch from the shared branch: `git worktree add .worktrees/<id> -b step-<id> origin/<branch>`, or the local branch without a remote, using a short name instead of `step-<id>` for a change that isn't a step. With a remote, push the branch straight away so other machines see the claim.
+2. **Commit each change once its checks pass**, then rebase onto the shared branch and rerun the checks. Never merge the shared branch into yours. When a rebase conflicts in a generated file, rerun its generator instead of merging it by hand.
 3. **Review before merging.** Once the checks pass, start a fresh agent with none of the step's context and have it follow [review-step](.agents/skills/review-step/SKILL.md) on the branch. Fix what it finds that this guide and the spec agree with. A finding that would change the spec is a question for the team.
 4. **Merge.**
-   - With a GitHub remote: push, open a pull request with `gh pr create`, wait for its checks with `gh pr checks --watch`, then `gh pr merge --rebase --delete-branch`. If GitHub says the branch is out of date, run `gh pr update-branch --rebase` and wait for the checks again; if that conflicts, rebase locally and `git push --force-with-lease`. If the merge is still refused, stop and ask.
-   - Without a remote: fast-forward `main` with `git merge --ff-only step-<id>`.
-5. **Force-push only your own branch, and only with `--force-with-lease`.** Never force-push `main`.
+   - With a GitHub remote: push, open a pull request against the shared branch with `gh pr create --base <branch>`, wait for its checks with `gh pr checks --watch`, then `gh pr merge --rebase --delete-branch`. If GitHub says the branch is out of date, run `gh pr update-branch --rebase` and wait for the checks again; if that conflicts, rebase locally and `git push --force-with-lease`. If the merge is still refused, stop and ask.
+   - Without a remote: fast-forward the shared branch with `git merge --ff-only step-<id>`.
+5. **Force-push only your own branch, and only with `--force-with-lease`.** Never force-push `main` or `dev`.
 6. **Clean up after the merge:** `git worktree remove .worktrees/<id>`, then `git branch -D step-<id>` (a rebase merge gives the commits new ids, so `-d` refuses), then update the root checkout with `git pull --ff-only` when there's a remote.
 
 ## Consolidation pass
 
-Cleanup happens at the end of every milestone, without waiting for a yes. Once every agent step of a milestone is ticked on the shared `main`, one agent runs the pass in a worktree named `consolidate-<milestone>`:
+Cleanup happens at the end of every milestone, without waiting for a yes. Once every agent step of a milestone is ticked on the shared branch, one agent runs the pass in a worktree named `consolidate-<milestone>`:
 
 1. Follow [audit-milestone](.agents/skills/audit-milestone/SKILL.md) on the code folders, and [debt-ledger](.agents/skills/debt-ledger/SKILL.md) for the `NOTE:` comments that are due.
 2. Fix every must-fix and should-fix finding: delete dead code, reuse instead of duplicating, merge near-copies, split code that mixes jobs, and resolve each `NOTE:` whose upgrade point has been reached.

@@ -3,7 +3,7 @@ name: debt-ledger
 description: >
   List every `NOTE:` comment as a ledger of deliberate simplifications, and
   flag the ones that are due because the step they wait for is ticked on
-  the shared `main`. One-shot report, changes nothing. Use in the consolidation pass
+  the shared branch. One-shot report, changes nothing. Use in the consolidation pass
   (AGENTS.md), and for "list the NOTE comments", "what did we defer".
 ---
 
@@ -29,9 +29,9 @@ mentions the convention out of the ledger.
 For each row, find what it waits for and check it:
 
 - A step id: ticked in [the build order](../../../docs/product.md#build-order)
-  on the shared `main` (AGENTS.md)? Then it is **due**.
+  on the shared branch (AGENTS.md)? Then it is **due**.
 - A platform step id, like `platform 2.1`: ticked in
-  `docs/platform/build-order.md` on the shared `main`? Then it is **due**.
+  `docs/platform/build-order.md` on the shared branch? Then it is **due**.
 - A decision id: `accepted` in [decisions.md](../../../docs/decisions.md),
   or in `docs/platform/decisions.md` for a `P-` id? Then it is **due**.
 - A condition ("once the worker exists"): true in the code now? Then it is

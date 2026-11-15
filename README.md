@@ -48,7 +48,7 @@ The guide also carries a build workflow that runs without someone watching every
 
 - Placeholder text: `TBD`, `TODO`, `etc.`, "to be decided" or an unfilled template marker.
 - A broken link or anchor.
-- A decision that's cited but doesn't exist, or a citation of a superseded decision.
+- A decision that's cited but doesn't exist, or a citation of a superseded decision, including one in a live decision row's own words rather than under Supersedes.
 - A malformed decision row, an open decision that doesn't name the step, milestone or backticked phase it blocks, or a superseded row that nothing replaced.
 - An unticked build step without a done-when, an `(after …)` that names a missing step, or a milestone without a done-when or a confirm step.
 - An agent's step that names an open decision without waiting for it, or builds on a proposed one.

@@ -25,6 +25,7 @@ The checker catches what a script can see. The audit catches the rest: the gaps 
 | Duplicate | One fact restated in a second place, even if both agree today | The same limit in a feature file and in a shared doc |
 | Overloaded value | One value with two meanings | `null` meaning both "unlimited" and "not decided yet" |
 | Unclear lifecycle | A status or state that's missing values, or the moves between them | A relationship that can end, with no rule for when |
+| Unhandled edge | A feature that says what happens on the main path but not once it's finished or used up, when the server refuses it, when a guest's data joins an account or the account is deleted, or when a second device acts on it | A drill that ends after ten replies, with nothing said about reopening it or a reply sent from another phone |
 | Released-client trap | Something installed apps will depend on, still undecided before the first release | Whether a hidden score is left out of a response, sent as null or flagged |
 | Scope leak | An earlier step depends on something only a later phase specifies, or a feature file holds an idea no decision promoted | An MVP step that needs a later feature's data |
 | Refused work | A step or a feature that builds something never.md refuses | A reminder that guilt-trips users back, when never.md refuses guilt notifications |

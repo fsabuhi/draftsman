@@ -18,7 +18,7 @@ This is a report someone asked for, so give it in full.
 ## 1. Understand first
 
 - Review what you are asked to: a branch, a commit range or files. Nothing
-  named: the current branch's commits since the shared `main` (AGENTS.md), plus any uncommitted
+  named: the current branch's commits since the shared branch (AGENTS.md), plus any uncommitted
   changes.
 - Read the guides for the code you review: the root `AGENTS.md`, then the
   `AGENTS.md` of each folder the change touches, and the feature file of the step.
@@ -70,7 +70,7 @@ This is a report someone asked for, so give it in full.
   empty, the code really is unused.
 - A deliberate simplification marked with a `NOTE:` comment that names its limit is a
   decision, not a finding, unless the expected load already crosses it or the step it
-  waits for is ticked on the shared `main` (AGENTS.md).
+  waits for is ticked on the shared branch (AGENTS.md).
 - Propose the smallest fix that works. Prefer fixes that delete code. Never
   add layers, frameworks or config the problem does not need.
 - No style taste, no "consider", no vague worries.

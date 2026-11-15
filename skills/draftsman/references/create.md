@@ -31,6 +31,7 @@ Take every answer the user's request and the base already give, and ask only wha
 **Round 2: each MVP feature** (two or three features per batch)
 - What does the user do, step by step, and what do they see?
 - What are the rules: limits, who may do what, what happens when something fails?
+- What happens at the edges: once it's finished or used up, when the server refuses it, when a guest's data joins an account or the account is deleted, and when a second device acts on it at the same time?
 - How will you know it's done?
 - What's explicitly out of scope?
 

@@ -523,6 +523,14 @@ def check_decision_links(rows, phases, project, platform, err):
                 err(path, f"{did} supersedes {old}, so mark {old} `superseded`", r["line"])
     for did, r in rows.items():
         path = r["path"]
+        # A live row's own words cite only live rows; the rows it replaces are named under Supersedes.
+        if r["status"] != "superseded":
+            replaced = set(DECISION.findall(r["cells"][5])) if not r["open_table"] else set()
+            for cell in r["cells"][3:5]:
+                for old in sorted(set(DECISION.findall(cell)) - replaced - {did}):
+                    if old in rows and rows[old]["status"] == "superseded":
+                        err(path, f"{did} cites {old}, which is superseded: point it at the row that "
+                            f"replaced it if the sentence still holds, otherwise restate {did}", r["line"])
         if r["status"] == "superseded" and did not in named:
             err(path, f"{did} is superseded, but no row names it under Supersedes", r["line"])
         if r["status"] != "open":
